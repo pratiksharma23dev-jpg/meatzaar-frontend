@@ -84,21 +84,11 @@ sideLinks.forEach(link => {
 // ==================== AUTH STATE ====================
 const authButtons = document.getElementById('authButtons');
 const profileLink = document.getElementById('profileLink');
-const loginBtn = document.getElementById('loginBtn');
-const signupBtn = document.getElementById('signupBtn');
 
 if (typeof MeatzaarAuth !== 'undefined' && MeatzaarAuth.isLoggedIn()) {
-    authButtons.style.display = 'none';
-    profileLink.style.display = '';
+    if (authButtons) authButtons.style.display = 'none';
+    if (profileLink) profileLink.style.display = '';
 } else {
-    authButtons.style.display = '';
-    profileLink.style.display = 'none';
+    if (authButtons) authButtons.style.display = '';
+    if (profileLink) profileLink.style.display = 'none';
 }
-
-loginBtn.addEventListener('click', () => {
-    window.location.href = '../landing page/index.html?action=login';
-});
-
-signupBtn.addEventListener('click', () => {
-    window.location.href = '../landing page/index.html?action=signup';
-});
