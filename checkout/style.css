@@ -354,6 +354,30 @@ nav a:hover {
     gap: 0.5rem;
 }
 
+.saved-address-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+}
+
+.btn-saved-address {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.82rem;
+    background: #2f3f57;
+    color: #fff;
+}
+
+.btn-saved-address:hover {
+    background: #40587d;
+    color: #fff;
+}
+
+.saved-address-note {
+    color: #aaa;
+    font-size: 0.78rem;
+}
+
 .checkout-input {
     width: 100%;
     padding: 0.75rem 1rem;
@@ -547,6 +571,11 @@ nav a:hover {
     .phone-row {
         flex-direction: column;
         gap: 0;
+    }
+
+    .saved-address-row {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 

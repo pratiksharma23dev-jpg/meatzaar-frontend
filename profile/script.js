@@ -64,7 +64,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     profileGrid.style.display = '';
 
     // Load user info
-    const user = MeatzaarAuth.getUser();
+    const localUser = MeatzaarAuth.getUser() || {};
+    let user = localUser;
+    try {
+        const freshProfile = await MeatzaarAuth.getProfile();
+        if (freshProfile) {
+            user = { ...localUser, ...freshProfile };
+            localStorage.setItem('meatzaar_user', JSON.stringify(user));
+        }
+    } catch {
+        // Fallback to local cached profile.
+    }
+
     document.getElementById('profileName').textContent = user.name || 'User';
     document.getElementById('profileEmail').textContent = user.email || '';
     document.getElementById('profilePhone').textContent = user.phone || 'Not set';

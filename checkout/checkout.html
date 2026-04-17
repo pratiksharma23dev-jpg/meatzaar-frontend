@@ -33,7 +33,7 @@
             <i class="fas fa-times"></i>
         </button>
         <nav class="side-nav">
-            <a href="../landing page/index.html" class="side-link">Home</a>
+            <a href="/index.html" class="side-link">Home</a>
             <a href="../what-we-sell/what-we-sell.html" class="side-link">What We Sell</a>
             <a href="../contact/contact.html" class="side-link">Contact</a>
             <a href="../products page/products.html" class="side-link">Products</a>
@@ -94,6 +94,12 @@
 
                 <div class="delivery-info">
                     <h4><i class="fas fa-truck"></i> Delivery Address</h4>
+                    <div class="saved-address-row" id="savedAddressRow" style="display:none;">
+                        <button type="button" class="btn btn-saved-address" id="useSavedAddressBtn">
+                            Use saved address
+                        </button>
+                        <span class="saved-address-note" id="savedAddressNote"></span>
+                    </div>
                     <input type="text" id="fullName" placeholder="Full Name *" class="checkout-input" required>
                     <input type="text" id="address" placeholder="Address Line 1 *" class="checkout-input" required>
                     <input type="text" id="address2" placeholder="Address Line 2 (Optional)" class="checkout-input">

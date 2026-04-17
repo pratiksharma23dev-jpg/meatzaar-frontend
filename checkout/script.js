@@ -12,8 +12,12 @@ const sendOtpBtn = document.getElementById('sendOtpBtn');
 const verifyOtpBtn = document.getElementById('verifyOtpBtn');
 const phoneOtpInput = document.getElementById('phoneOtp');
 const phoneStatus = document.getElementById('phoneStatus');
+const savedAddressRow = document.getElementById('savedAddressRow');
+const useSavedAddressBtn = document.getElementById('useSavedAddressBtn');
+const savedAddressNote = document.getElementById('savedAddressNote');
 let phoneVerified = false;
 let verifiedPhone = '';
+let savedCheckoutProfile = null;
 
 // ==================== SIDE MENU ====================
 menuToggle.addEventListener('click', () => {
@@ -129,21 +133,54 @@ async function prefillSavedDeliveryInfo() {
 
     try {
         const profile = await MeatzaarAuth.getProfile();
+        savedCheckoutProfile = profile || null;
         const savedPhone = normalizePhone(profile?.phone).slice(0, 10);
+        const savedAddress = String(profile?.address || '').trim();
 
         if (!fullNameInput.value.trim() && profile?.name) {
             fullNameInput.value = profile.name;
         }
-        if (!addressInput.value.trim() && profile?.address) {
-            addressInput.value = profile.address;
-        }
-        if (!phoneInput.value.trim() && savedPhone) {
-            phoneInput.value = savedPhone;
-            setPhoneStatus('Saved phone loaded. Please verify with OTP to place this order.', 'info');
+
+        if (savedAddressRow) {
+            const hasSavedData = Boolean(savedAddress || savedPhone);
+            savedAddressRow.style.display = hasSavedData ? 'flex' : 'none';
+            if (savedAddressNote) {
+                savedAddressNote.textContent = hasSavedData
+                    ? 'Saved contact available from your previous order'
+                    : '';
+            }
         }
     } catch {
         // Ignore prefill failures and let checkout continue normally.
     }
+}
+
+if (useSavedAddressBtn) {
+    useSavedAddressBtn.addEventListener('click', () => {
+        if (!savedCheckoutProfile) return;
+
+        const fullNameInput = document.getElementById('fullName');
+        const addressInput = document.getElementById('address');
+        const savedAddress = String(savedCheckoutProfile.address || '').trim();
+        const savedPhone = normalizePhone(savedCheckoutProfile.phone).slice(0, 10);
+
+        if (savedCheckoutProfile.name && !fullNameInput.value.trim()) {
+            fullNameInput.value = savedCheckoutProfile.name;
+        }
+        if (savedAddress) {
+            addressInput.value = savedAddress;
+        }
+        if (savedPhone) {
+            phoneInput.value = savedPhone;
+            phoneVerified = false;
+            verifiedPhone = '';
+            setPhoneStatus('Saved phone loaded. Please verify with OTP to place this order.', 'info');
+        }
+
+        if (savedAddressNote) {
+            savedAddressNote.textContent = 'Saved details applied';
+        }
+    });
 }
 
 function renderCheckout() {
