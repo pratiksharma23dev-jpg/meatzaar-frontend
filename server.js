@@ -40,15 +40,15 @@ const server = http.createServer((req, res) => {
     }
 
     fs.stat(filePath, (statErr, stats) => {
+        let targetPath;
         if (statErr) {
-            res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-            res.end('Not Found');
-            return;
+            // Fallback: serve index.html for unknown routes (SPA/landing page)
+            targetPath = path.join(ROOT, 'index.html');
+        } else {
+            targetPath = stats.isDirectory()
+                ? path.join(filePath, 'index.html')
+                : filePath;
         }
-
-        const targetPath = stats.isDirectory()
-            ? path.join(filePath, 'index.html')
-            : filePath;
 
         fs.readFile(targetPath, (readErr, content) => {
             if (readErr) {
@@ -56,7 +56,6 @@ const server = http.createServer((req, res) => {
                 res.end('Not Found');
                 return;
             }
-
             const ext = path.extname(targetPath).toLowerCase();
             const contentType = MIME_TYPES[ext] || 'application/octet-stream';
             res.writeHead(200, { 'Content-Type': contentType });
