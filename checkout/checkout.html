@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../pictures/landing_img2.png">
+    <title>Meatzaar - Checkout</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sekuya&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../shared/config.js"></script>
+    <script src="../shared/auth.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-left">
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <h1>Meatzaar</h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Side Menu -->
+    <aside class="side-menu" id="sideMenu">
+        <button class="close-menu" id="closeMenu">
+            <i class="fas fa-times"></i>
+        </button>
+        <nav class="side-nav">
+            <a href="../landing page/index.html" class="side-link">Home</a>
+            <a href="../what-we-sell/what-we-sell.html" class="side-link">What We Sell</a>
+            <a href="../contact/contact.html" class="side-link">Contact</a>
+            <a href="../products page/products.html" class="side-link">Products</a>
+            <a href="../cart/cart.html" class="side-link">Cart</a>
+            <a href="../profile/profile.html" class="side-link">Profile</a>
+            <hr>
+            <button class="btn btn-login btn-full" id="loginBtnMobile">Login</button>
+            <button class="btn btn-signup btn-full" id="signupBtnMobile">Sign Up</button>
+        </nav>
+    </aside>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Checkout Section -->
+    <section class="checkout-section">
+        <h2>Checkout</h2>
+
+        <div class="checkout-layout">
+            <!-- Order Review -->
+            <div class="order-review">
+                <h3><i class="fas fa-clipboard-list"></i> Order Review</h3>
+                <div class="order-items" id="orderItems">
+                    <!-- Items populated by JS -->
+                </div>
+
+                <!-- Empty state -->
+                <div class="empty-checkout" id="emptyCheckout" style="display: none;">
+                    <i class="fas fa-box-open"></i>
+                    <p>No items to checkout</p>
+                    <a href="../cart/cart.html" class="btn">Go to Cart</a>
+                </div>
+            </div>
+
+            <!-- Payment Summary -->
+            <div class="payment-panel" id="paymentPanel" style="display: none;">
+                <h3><i class="fas fa-receipt"></i> Payment Summary</h3>
+
+                <div class="price-breakdown">
+                    <div class="price-row">
+                        <span>Items (<span id="itemCount">0</span>)</span>
+                        <span id="checkoutSubtotal">₹0.00</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Tax (10%)</span>
+                        <span id="checkoutTax">₹0.00</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Delivery</span>
+                        <span id="checkoutDelivery">₹5.00</span>
+                    </div>
+                    <div class="price-divider"></div>
+                    <div class="price-row price-total">
+                        <span>Total</span>
+                        <span id="checkoutTotal">₹0.00</span>
+                    </div>
+                </div>
+
+                <div class="delivery-info">
+                    <h4><i class="fas fa-truck"></i> Delivery Address</h4>
+                    <input type="text" id="fullName" placeholder="Full Name *" class="checkout-input" required>
+                    <input type="text" id="address" placeholder="Address Line 1 *" class="checkout-input" required>
+                    <input type="text" id="address2" placeholder="Address Line 2 (Optional)" class="checkout-input">
+                    <input type="text" id="landmark" placeholder="Landmark * (e.g. Near City Mall)" class="checkout-input" required>
+                    <input type="text" id="city" placeholder="City *" class="checkout-input" required>
+                    <div class="pincode-wrapper">
+                        <input type="text" id="zip" placeholder="PIN Code *" class="checkout-input" maxlength="6" inputmode="numeric" required>
+                        <span class="pincode-status" id="pincodeStatus"></span>
+                    </div>
+                    <div class="phone-verify-block">
+                        <div class="phone-row">
+                            <input type="tel" id="phone" placeholder="Phone Number * (10 digits)" class="checkout-input" maxlength="10" inputmode="numeric" required>
+                            <button type="button" class="btn btn-otp" id="sendOtpBtn">Send OTP</button>
+                        </div>
+                        <div class="phone-row">
+                            <input type="text" id="phoneOtp" placeholder="Enter 6-digit OTP" class="checkout-input" maxlength="6" inputmode="numeric">
+                            <button type="button" class="btn btn-otp btn-otp-verify" id="verifyOtpBtn">Verify OTP</button>
+                        </div>
+                        <div class="phone-status" id="phoneStatus"></div>
+                    </div>
+                </div>
+
+                <button class="btn btn-pay" id="payNowBtn">
+                    <i class="fas fa-lock"></i> Pay Now
+                </button>
+
+                <a href="../cart/cart.html" class="back-to-cart">
+                    <i class="fas fa-arrow-left"></i> Back to Cart
+                </a>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

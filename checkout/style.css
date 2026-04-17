@@ -1,0 +1,572 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #FF7300;
+    --dark-color: #1a1a1a;
+    --light-color: #ffffff;
+    --text-color: #ffffff;
+    --border-color: #333;
+    --bg-color: #0d0d0d;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--light-color);
+    background-color: var(--bg-color);
+}
+
+header {
+    background-color: var(--dark-color);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.menu-toggle {
+    display: block;
+    background: none;
+    border: 2px solid var(--primary-color);
+    color: var(--light-color);
+    border-radius: 6px;
+    padding: 0.35rem 0.6rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.menu-toggle:hover {
+    background-color: rgba(255, 140, 0, 0.2);
+}
+
+.logo h1 {
+    font-family: 'Sekuya', sans-serif;
+    color: var(--primary-color);
+    font-size: 1.8rem;
+}
+
+nav {
+    display: flex;
+    gap: 2rem;
+}
+
+nav a {
+    color: var(--light-color);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: var(--primary-color);
+}
+
+/* ==================== SIDE MENU ==================== */
+.side-menu {
+    position: fixed;
+    left: -300px;
+    top: 0;
+    width: 300px;
+    height: 100vh;
+    background-color: var(--dark-color);
+    color: var(--light-color);
+    padding: 2rem 1.5rem;
+    z-index: 200;
+    transition: left 0.3s;
+    overflow-y: auto;
+}
+
+.side-menu.active {
+    left: 0;
+}
+
+.close-menu {
+    background: none;
+    border: none;
+    color: var(--light-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-bottom: 2rem;
+}
+
+.side-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.side-link {
+    color: var(--light-color);
+    text-decoration: none;
+    padding: 0.5rem;
+    transition: color 0.3s;
+}
+
+.side-link:hover {
+    color: var(--primary-color);
+}
+
+.side-menu hr {
+    margin: 1.5rem 0;
+    border: none;
+    border-top: 1px solid var(--border-color);
+}
+
+/* ==================== OVERLAY ==================== */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 150;
+    display: none;
+}
+
+.overlay.active {
+    display: block;
+}
+
+/* ==================== BUTTONS ==================== */
+.btn {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s;
+    font-size: 1rem;
+}
+
+.btn:hover {
+    background-color: var(--light-color);
+    color: black;
+}
+
+.btn-full {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.btn-login {
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--light-color);
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+}
+
+.btn-login:hover {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+}
+
+.btn-signup {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+}
+
+/* ==================== CHECKOUT SECTION ==================== */
+.checkout-section {
+    padding: 3rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: calc(100vh - 80px);
+}
+
+.checkout-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: var(--light-color);
+}
+
+.checkout-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+/* ==================== ORDER REVIEW ==================== */
+.order-review {
+    background-color: var(--dark-color);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 2rem;
+}
+
+.order-review h3 {
+    color: var(--primary-color);
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.order-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.order-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: border-color 0.3s;
+}
+
+.order-item:hover {
+    border-color: var(--primary-color);
+}
+
+.order-item-icon {
+    width: 60px;
+    height: 60px;
+    background-color: var(--dark-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.order-item-icon i {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+}
+
+.order-item-details {
+    flex: 1;
+}
+
+.order-item-name {
+    font-weight: bold;
+    color: var(--light-color);
+    font-size: 1.05rem;
+}
+
+.order-item-meta {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.order-item-price {
+    font-weight: bold;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.empty-checkout {
+    text-align: center;
+    padding: 3rem;
+}
+
+.empty-checkout i {
+    font-size: 4rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.empty-checkout p {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    color: #ddd;
+}
+
+/* ==================== PAYMENT PANEL ==================== */
+.payment-panel {
+    background-color: var(--dark-color);
+    border: 2px solid var(--primary-color);
+    border-radius: 10px;
+    padding: 2rem;
+    position: sticky;
+    top: 20px;
+}
+
+.payment-panel h3 {
+    color: var(--primary-color);
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Price Breakdown */
+.price-breakdown {
+    margin-bottom: 2rem;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+    color: #ddd;
+    font-size: 1rem;
+}
+
+.price-divider {
+    border-top: 1px solid var(--border-color);
+    margin: 0.5rem 0;
+}
+
+.price-total {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--light-color);
+    padding-top: 0.75rem;
+}
+
+/* Delivery Info */
+.delivery-info {
+    margin-bottom: 2rem;
+}
+
+.delivery-info h4 {
+    color: var(--light-color);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.checkout-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    background-color: #2a2a2a;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--light-color);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s;
+}
+
+.checkout-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.checkout-input::placeholder {
+    color: #777;
+}
+
+.input-row {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.input-row .checkout-input {
+    flex: 1;
+}
+
+.pincode-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.pincode-wrapper .checkout-input {
+    width: 100%;
+}
+
+.pincode-status {
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    min-height: 1.1em;
+}
+
+.pincode-status.valid {
+    color: #4caf50;
+}
+
+.pincode-status.invalid {
+    color: #f44336;
+}
+
+.pincode-status.checking {
+    color: #ff9800;
+}
+
+.phone-verify-block {
+    margin-bottom: 0.5rem;
+}
+
+.phone-row {
+    display: flex;
+    gap: 0.6rem;
+    align-items: stretch;
+}
+
+.phone-row .checkout-input {
+    margin-bottom: 0.75rem;
+}
+
+.btn-otp {
+    white-space: nowrap;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    align-self: flex-start;
+    background-color: #2f3f57;
+    color: #fff;
+}
+
+.btn-otp:hover {
+    background-color: #40587d;
+    color: #fff;
+}
+
+.btn-otp-verify {
+    background-color: #226d3a;
+}
+
+.btn-otp-verify:hover {
+    background-color: #2d8f4d;
+}
+
+.phone-status {
+    min-height: 1.1em;
+    margin-top: -0.25rem;
+    margin-bottom: 0.25rem;
+    font-size: 0.82rem;
+}
+
+.phone-status.success {
+    color: #4caf50;
+}
+
+.phone-status.error {
+    color: #f44336;
+}
+
+.phone-status.info {
+    color: #ff9800;
+}
+
+/* Pay Now Button */
+.btn-pay {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background-color: #4caf50;
+    color: var(--light-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-pay:hover {
+    background-color: #66bb6a;
+    transform: translateY(-2px);
+}
+
+.btn-pay:active {
+    transform: translateY(0);
+}
+
+/* Back to Cart */
+.back-to-cart {
+    display: block;
+    text-align: center;
+    margin-top: 1rem;
+    color: #aaa;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.3s;
+}
+
+.back-to-cart:hover {
+    color: var(--primary-color);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    nav {
+        display: none;
+    }
+
+    .checkout-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-panel {
+        position: static;
+    }
+
+    .checkout-section {
+        padding: 2rem 1rem;
+    }
+
+    .checkout-section h2 {
+        font-size: 1.8rem;
+    }
+
+    .order-item {
+        flex-wrap: wrap;
+    }
+
+    .input-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .phone-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .order-review,
+    .payment-panel {
+        padding: 1.5rem;
+    }
+
+    .order-item-icon {
+        width: 45px;
+        height: 45px;
+    }
+
+    .order-item-icon i {
+        font-size: 1.3rem;
+    }
+
+    .checkout-section h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+}

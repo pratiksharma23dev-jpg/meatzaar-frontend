@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../pictures/landing_img2.png">
+    <title>Meatzaar - Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sekuya&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="../shared/config.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <h1 class="logo-text">Meatzaar</h1>
+            <h2>Admin Panel</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="adminPassword">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="adminPassword" placeholder="Enter admin password" required>
+                        <button type="button" class="toggle-pw" id="togglePw">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-lock"></i> Login
+                </button>
+                <p class="login-error" id="loginError"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="dashboard hidden" id="dashboard">
+
+        <!-- Top Bar -->
+        <header class="admin-header">
+            <div class="header-left">
+                <h1 class="logo-text">Meatzaar</h1>
+                <span class="admin-badge">Admin</span>
+            </div>
+            <button class="btn btn-logout" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="products">
+                <i class="fas fa-box"></i> Products
+            </button>
+            <button class="tab-btn" data-tab="add-product">
+                <i class="fas fa-plus-circle"></i> Add Product
+            </button>
+            <button class="tab-btn" data-tab="orders">
+                <i class="fas fa-shopping-bag"></i> Orders
+            </button>
+        </nav>
+
+        <!-- ==================== PRODUCTS TAB ==================== -->
+        <section class="tab-content active" id="tab-products">
+            <div class="section-header">
+                <h2>All Products</h2>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="productSearch" placeholder="Search products...">
+                </div>
+            </div>
+
+            <div class="delete-bar">
+                <h3><i class="fas fa-trash-alt"></i> Quick Delete</h3>
+                <div class="delete-row">
+                    <input type="text" id="deleteCode" placeholder="Enter product code (e.g. MZ-A1B2C3D4)">
+                    <button class="btn btn-danger" id="deleteByCodeBtn">Delete</button>
+                </div>
+            </div>
+
+            <div class="products-table-wrap">
+                <table class="data-table" id="productsTable">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsBody"></tbody>
+                </table>
+                <p class="empty-msg hidden" id="noProducts">No products found.</p>
+            </div>
+        </section>
+
+        <!-- ==================== ADD PRODUCT TAB ==================== -->
+        <section class="tab-content" id="tab-add-product">
+            <h2>Add New Product</h2>
+            <form class="product-form" id="addProductForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="prodName">Product Name *</label>
+                        <input type="text" id="prodName" name="name" required placeholder="e.g. Chicken Bacon">
+                    </div>
+                    <div class="form-group">
+                        <label for="prodCategory">Category *</label>
+                        <select id="prodCategory" name="category" required>
+                            <option value="">Select category</option>
+                            <option value="chicken-cold-cuts">Chicken Cold Cuts</option>
+                            <option value="pork-cold-cuts">Pork Cold Cuts</option>
+                            <option value="pork-cured-fermented">Pork Cured & Fermented</option>
+                            <option value="raw-pork">Raw Pork</option>
+                            <option value="turkey-cold-cuts">Turkey Cold Cuts</option>
+                            <option value="duck-cold-cuts">Duck Cold Cuts</option>
+                            <option value="lamb-cold-cuts">Lamb Cold Cuts</option>
+                            <option value="goat-meat">Goat Meat</option>
+                            <option value="imported-seafood">Imported Seafood</option>
+                            <option value="indian-seafood">Indian Seafood</option>
+                            <option value="japanese-groceries">Japanese Groceries</option>
+                            <option value="japanese-frozen-seafood">Japanese Frozen Seafood</option>
+                            <option value="golden-wrap">Golden Wrap</option>
+                            <option value="sakura-frozen">Sakura Frozen</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="prodClassification">Classification</label>
+                        <input type="text" id="prodClassification" name="classification" placeholder="e.g. Bacon, Sausage, Ham">
+                    </div>
+                    <div class="form-group">
+                        <label for="prodWeight">Weight</label>
+                        <input type="text" id="prodWeight" name="weight" placeholder="e.g. 1 kg">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="prodPrice">Price (₹) *</label>
+                        <input type="number" id="prodPrice" name="price" required min="1" placeholder="e.g. 450">
+                    </div>
+                    <div class="form-group">
+                        <label for="prodCountry">Country</label>
+                        <input type="text" id="prodCountry" name="country" placeholder="e.g. India" value="India">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="prodStatus">Status</label>
+                        <select id="prodStatus" name="status">
+                            <option value="in-stock">In Stock</option>
+                            <option value="out-of-stock">Out of Stock</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="prodImage">Product Image</label>
+                        <input type="file" id="prodImage" name="image" accept="image/jpeg,image/png,image/webp">
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="prodDescription">Description</label>
+                    <textarea id="prodDescription" name="description" rows="3" placeholder="Product description..."></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <div class="image-preview hidden" id="imagePreview">
+                        <img id="previewImg" src="" alt="Preview">
+                        <button type="button" class="btn-remove-img" id="removeImg">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-plus"></i> Add Product
+                </button>
+                <p class="form-msg" id="addProductMsg"></p>
+            </form>
+        </section>
+
+        <!-- ==================== ORDERS TAB ==================== -->
+        <section class="tab-content" id="tab-orders">
+            <div class="section-header">
+                <h2>All Orders</h2>
+                <div class="order-filters">
+                    <select id="orderStatusFilter">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="preparing">Preparing</option>
+                        <option value="out-for-delivery">Out for Delivery</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="orders-list" id="ordersList"></div>
+            <p class="empty-msg hidden" id="noOrders">No orders found.</p>
+        </section>
+
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div class="modal-overlay hidden" id="editProductModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Edit Product</h3>
+                <button type="button" class="modal-close" id="closeEditModal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editProductForm">
+                <p class="modal-code" id="editProductCode">Code: -</p>
+                <div class="form-group">
+                    <label for="editProdName">Product Name *</label>
+                    <input type="text" id="editProdName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editProdPrice">Price (₹) *</label>
+                    <input type="number" id="editProdPrice" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="editProdStatus">Stock Status *</label>
+                    <select id="editProdStatus" required>
+                        <option value="in-stock">In Stock</option>
+                        <option value="out-of-stock">Out of Stock</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editProdDescription">Description</label>
+                    <textarea id="editProdDescription" rows="4" placeholder="Product description..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" id="cancelEditBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveEditBtn">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+                <p class="form-msg" id="editProductMsg"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast hidden" id="toast"></div>
+
+</body>
+</html>

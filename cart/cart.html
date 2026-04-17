@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../pictures/landing_img2.png">
+    <title>Meatzaar - Shopping Cart</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sekuya&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../shared/config.js"></script>
+    <script src="../shared/auth.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-left">
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <h1>Meatzaar</h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Side Menu -->
+    <aside class="side-menu" id="sideMenu">
+        <button class="close-menu" id="closeMenu">
+            <i class="fas fa-times"></i>
+        </button>
+        <nav class="side-nav">
+            <a href="../landing page/index.html" class="side-link">Home</a>
+            <a href="../what-we-sell/what-we-sell.html" class="side-link">What We Sell</a>
+            <a href="../contact/contact.html" class="side-link">Contact</a>
+            <a href="../products page/products.html" class="side-link">Products</a>
+            <a href="cart.html" class="side-link">Cart</a>
+            <a href="../profile/profile.html" class="side-link">Profile</a>
+            <hr>
+            <button class="btn btn-login btn-full" id="loginBtnMobile">Login</button>
+            <button class="btn btn-signup btn-full" id="signupBtnMobile">Sign Up</button>
+        </nav>
+    </aside>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Delete All Confirmation Modal -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-card">
+            <i class="fas fa-exclamation-triangle confirm-icon"></i>
+            <h3>Clear Cart?</h3>
+            <p>Are you sure you want to remove all items from your cart? This action cannot be undone.</p>
+            <div class="confirm-buttons">
+                <button class="btn confirm-cancel" id="confirmCancel">Cancel</button>
+                <button class="btn confirm-delete" id="confirmDelete">Yes, Delete All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Section -->
+    <section class="cart-section">
+        <h2>Shopping Cart</h2>
+        
+        <div class="cart-container">
+            <!-- Cart Items -->
+            <div class="cart-items" id="cartItems">
+                <!-- Cart items will be populated here by JavaScript -->
+            </div>
+
+            <!-- Empty Cart Message -->
+            <div class="empty-cart" id="emptyCart" style="display: none;">
+                <i class="fas fa-shopping-cart"></i>
+                <p>Your cart is empty</p>
+                <a href="../products page/products.html" class="btn">Continue Shopping</a>
+            </div>
+        </div>
+
+        <!-- Cart Summary -->
+        <div class="cart-summary" id="cartSummary" style="display: none;">
+            <div class="summary-box">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">₹0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax (10%):</span>
+                    <span id="tax">₹0.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span id="total">₹0.00</span>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-delete-all" id="deleteAllBtn">Delete All</button>
+                    <button class="btn btn-checkout" id="checkoutBtn">Proceed to Checkout</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

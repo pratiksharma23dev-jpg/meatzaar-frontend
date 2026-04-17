@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../pictures/landing_img2.png">
+    <title>Meatzaar - Products</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sekuya&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../shared/config.js"></script>
+    <script src="../shared/auth.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">
+                    <h1>Meatzaar</h1>
+                </div>
+            </div>
+            <div class="search-wrapper">
+                <label class="search-box" for="searchInput">
+                    <i class="fas fa-search"></i>
+                    <input type="search" id="searchInput" placeholder="Search products" autocomplete="off">
+                </label>
+                <div class="search-dropdown" id="searchDropdown"></div>
+            </div>
+            <div class="auth-buttons">
+                <button class="btn btn-login" id="loginBtn">Login</button>
+                <button class="btn btn-signup" id="signupBtn">Sign Up</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Side Menu -->
+    <aside class="side-menu" id="sideMenu">
+        <button class="close-menu" id="closeMenu">
+            <i class="fas fa-times"></i>
+        </button>
+        <nav class="side-nav">
+            <a href="../landing page/index.html" class="side-link">Home</a>
+            <a href="../what-we-sell/what-we-sell.html" class="side-link">What We Sell</a>
+            <a href="../contact/contact.html" class="side-link">Contact</a>
+            <a href="../products page/products.html" class="side-link">Categories</a>
+            <a href="../cart/cart.html" class="side-link">Cart</a>
+            <a href="../profile/profile.html" class="side-link">Profile</a>
+            <hr>
+            <button class="btn btn-login btn-full" id="loginBtnMobile">Login</button>
+            <button class="btn btn-signup btn-full" id="signupBtnMobile">Sign Up</button>
+        </nav>
+    </aside>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Products Section -->
+    <section class="products-section" id="products">
+        <h2>Our Meat Categories</h2>
+        <div class="categories-grid">
+            <div class="category-card">
+                <div class="category-image">
+                    <img src="../pictures/chicken_category.png" alt="Fresh chicken cuts">
+                </div>
+                <h3>Chicken Cold Cuts</h3>
+                <p>Bacon, sausages, salami, pepperoni, mortadella, kebabs, and smoked chicken. Premium processed chicken products.</p>
+                <a href="../product_list/product_list.html?category=chicken-cold-cuts" class="btn">View Chicken Products</a>
+            </div>
+            <div class="category-card">
+                <div class="category-emoji">🥓</div>
+                <h3>Pork Cold Cuts</h3>
+                <p>Bacon, ham, frankfurters, sausages, salami, and mortadella. Quality pork deli selections.</p>
+                <a href="../product_list/product_list.html?category=pork-cold-cuts" class="btn">View Pork Cold Cuts</a>
+            </div>
+            <div class="category-card">
+                <div class="category-emoji">🥩</div>
+                <h3>Pork Cured &amp; Fermented</h3>
+                <p>Imported guanciale, prosciutto, chorizo, nduja, and premium salami. Authentic European cured meats.</p>
+                <a href="../product_list/product_list.html?category=pork-cured-fermented" class="btn">View Cured Pork</a>
+            </div>
+            <div class="category-card">
+                <div class="category-emoji">🍖</div>
+                <h3>Raw Pork</h3>
+                <p>Belly, ribs, chops, tenderloin, shoulder, and specialty cuts. Fresh raw pork for every recipe.</p>
+                <a href="../product_list/product_list.html?category=raw-pork" class="btn">View Raw Pork</a>
+            </div>
+            <div class="category-card">
+                <div class="category-emoji">🦃</div>
+                <h3>Turkey Cold Cuts</h3>
+                <p>Turkey ham, rashers, salami, sausages, pastrami, and smoked turkey. Lean deli favourites.</p>
+                <a href="../product_list/product_list.html?category=turkey-cold-cuts" class="btn">View Turkey Products</a>
+            </div>
+            <div class="category-card">
+                <div class="category-emoji">🦆</div>
+                <h3>Duck Cold Cuts</h3>
+                <p>Raw and smoked duck breast, whole duck, duck leg, and duck sausage. Rich and flavourful.</p>
+                <a href="../product_list/product_list.html?category=duck-cold-cuts" class="btn">View Duck Products</a>
+            </div>
+            <div class="category-card">
+                <div class="category-emoji">🐑</div>
+                <h3>Lamb Cold Cuts</h3>
+                <p>Lamb pepperoni, merguez sausage, seekh kebab, meatballs, and mutton mince.</p>
+                <a href="../product_list/product_list.html?category=lamb-cold-cuts" class="btn">View Lamb Products</a>
+            </div>
+            <div class="category-card">
+                <div class="category-emoji">🐐</div>
+                <h3>Goat Meat</h3>
+                <p>Curry cut, boneless, mince, chops, and whole leg. Fresh goat meat for traditional recipes.</p>
+                <a href="../product_list/product_list.html?category=goat-meat" class="btn">View Goat Products</a>
+            </div>
+            <div class="category-card">
+                <div class="category-emoji">🐟</div>
+                <h3>Imported Seafood</h3>
+                <p>Norwegian salmon, Chilean seabass, scallops, mussels, and premium catches from around the world.</p>
+                <a href="../product_list/product_list.html?category=imported-seafood" class="btn">View Imported Seafood</a>
+            </div>
+            <div class="category-card">
+                <div class="category-emoji">🦐</div>
+                <h3>Indian Seafood</h3>
+                <p>Prawns, pomfret, surmai, lobster, crab, squid, and basa. Fresh Indian ocean catch.</p>
+                <a href="../product_list/product_list.html?category=indian-seafood" class="btn">View Indian Seafood</a>
+            </div>
+            <div class="category-card">
+                <div class="category-emoji">🍣</div>
+                <h3>Japanese Groceries</h3>
+                <p>Sushi rice, nori, miso, soy sauce, mirin, dashi, noodles, wasabi, and 100+ Japanese pantry essentials.</p>
+                <a href="../product_list/product_list.html?category=japanese-groceries" class="btn">View Japanese Groceries</a>
+            </div>
+            <div class="category-card">
+                <div class="category-emoji">🐡</div>
+                <h3>Japanese Frozen Seafood</h3>
+                <p>Bluefin tuna, hamachi, uni, salmon sashimi, scallops, ikura, and sushi-grade frozen seafood.</p>
+                <a href="../product_list/product_list.html?category=japanese-frozen-seafood" class="btn">View Frozen Seafood</a>
+            </div>
+            <div class="category-card">
+                <div class="category-emoji">🥟</div>
+                <h3>Golden Wrap</h3>
+                <p>Gyoza skins, spring roll sheets, wonton wrappers, and lotus leaf buns. Ready-to-use dough sheets.</p>
+                <a href="../product_list/product_list.html?category=golden-wrap" class="btn">View Golden Wrap</a>
+            </div>
+            <div class="category-card">
+                <div class="category-emoji">🌸</div>
+                <h3>Sakura Frozen</h3>
+                <p>Edamame, frozen noodles, and wasabi paste. Quality frozen Japanese staples.</p>
+                <a href="../product_list/product_list.html?category=sakura-frozen" class="btn">View Sakura Frozen</a>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <link rel="icon" type="image/png" href="../pictures/landing_img2.png">    <title>Meatzaar - My Profile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sekuya&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="../shared/config.js"></script>
+    <script src="../shared/auth.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-left">
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <h1>Meatzaar</h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Side Menu -->
+    <aside class="side-menu" id="sideMenu">
+        <button class="close-menu" id="closeMenu">
+            <i class="fas fa-times"></i>
+        </button>
+        <nav class="side-nav">
+            <a href="../landing page/index.html" class="side-link">Home</a>
+            <a href="../what-we-sell/what-we-sell.html" class="side-link">What We Sell</a>
+            <a href="../contact/contact.html" class="side-link">Contact</a>
+            <a href="../products page/products.html" class="side-link">Products</a>
+            <a href="#" class="side-link">Cart</a>
+            <a href="#profile" class="side-link">Profile</a>
+            <hr>
+            <button class="btn btn-login btn-full" id="loginBtnMobile">Logout</button>
+        </nav>
+    </aside>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Profile Section -->
+    <section class="profile-container" id="profile">
+        <!-- Not logged in message -->
+        <div id="notLoggedIn" style="display:none;text-align:center;padding:60px 20px;">
+            <i class="fas fa-user-lock" style="font-size:4rem;color:#666;margin-bottom:20px;"></i>
+            <h2>Please log in to view your profile</h2>
+            <p style="color:#999;margin:10px 0 20px;">You need to be logged in to access your profile and order history.</p>
+            <a href="../landing page/index.html" class="btn" style="background:#c0392b;color:white;padding:12px 30px;border-radius:8px;text-decoration:none;">Go to Home</a>
+        </div>
+
+        <!-- Profile Header -->
+        <div class="profile-header" id="profileHeader" style="display:none;">
+            <div class="profile-avatar">👤</div>
+            <div class="profile-info">
+                <h2 id="profileName">Loading...</h2>
+                <p><i class="fas fa-envelope"></i> <span id="profileEmail"></span></p>
+                <p><i class="fas fa-phone"></i> <span id="profilePhone">Not set</span></p>
+                <p><i class="fas fa-map-marker-alt"></i> <span id="profileAddress">Not set</span></p>
+            </div>
+            <div class="profile-actions">
+                <button class="btn btn-logout" id="profileLogoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <!-- Profile Grid -->
+        <div class="profile-grid" id="profileGrid" style="display:none;">
+            <!-- Cart Section -->
+            <div class="section-card">
+                <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
+                <div class="cart-items" id="profileCartItems">
+                    <p style="color:#999;">Loading cart...</p>
+                </div>
+                <p style="color: #FFB347; margin-top: 1rem; font-weight: bold;" id="profileCartTotal"></p>
+                <a href="../cart/cart.html" class="btn checkout-btn">View Cart</a>
+            </div>
+
+            <!-- Orders Section -->
+            <div class="section-card">
+                <h3><i class="fas fa-history"></i> Your Orders</h3>
+                <div class="orders-list" id="profileOrdersList">
+                    <p style="color:#999;">Loading orders...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

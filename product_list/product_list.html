@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../pictures/landing_img2.png">
+    <title>Meatzaar - Product List</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sekuya&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>const PRODUCT_IMG_BASE = '../';</script>
+    <script src="../shared/config.js"></script>
+    <script src="../shared/auth.js" defer></script>
+    <script src="../shared/products-data.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <h1>Meatzaar</h1>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="search-wrapper">
+                <label class="search-box" for="searchInput">
+                    <i class="fas fa-search"></i>
+                    <input type="search" id="searchInput" placeholder="Search products" autocomplete="off">
+                </label>
+                <div class="search-dropdown" id="searchDropdown"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Side Menu -->
+    <aside class="side-menu" id="sideMenu">
+        <button class="close-menu" id="closeMenu" aria-label="Close menu">
+            <i class="fas fa-times"></i>
+        </button>
+        <nav class="side-nav">
+            <a href="../landing page/index.html" class="side-link">Home</a>
+            <a href="../what-we-sell/what-we-sell.html" class="side-link">What We Sell</a>
+            <a href="../products page/products.html" class="side-link">Categories</a>
+            <a href="../contact/contact.html" class="side-link">Contact</a>
+            <a href="../cart/cart.html" class="side-link">Cart</a>
+            <a href="../profile/profile.html" class="side-link">Profile</a>
+        </nav>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <button class="view-btn active" id="gridViewBtn" data-view="grid">Grid</button>
+            <button class="view-btn" id="listViewBtn" data-view="list">List</button>
+            <button class="view-btn" id="filtersToggleBtn">Filters</button>
+        </div>
+        <div class="toolbar-right">
+            <div class="toolbar-control">
+                <label>Sort</label>
+                <select id="sortSelect">
+                    <option value="popularity">Popularity</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="name">Name A-Z</option>
+                </select>
+            </div>
+            <div class="toolbar-control">
+                <label>Per page</label>
+                <select id="perPageSelect">
+                    <option value="12">12</option>
+                    <option value="24">24</option>
+                    <option value="48">48</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Sidebar Filters -->
+        <aside class="filters-sidebar" id="filtersSidebar">
+            <div class="filter-group">
+                <h4>Filters</h4>
+                <h5>Price</h5>
+                <div class="price-slider-labels">
+                    <span id="priceMinLabel">₹0</span>
+                    <span id="priceMaxLabel">₹5000</span>
+                </div>
+                <div class="price-slider-wrap">
+                    <input type="range" id="priceMinSlider" min="0" max="5000" value="0" step="50">
+                    <input type="range" id="priceMaxSlider" min="0" max="5000" value="5000" step="50">
+                    <div class="slider-track" id="sliderTrack"></div>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h5>Status</h5>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="in-stock"> In stock
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="out-of-stock"> Out of stock
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="on-sale"> On sale
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h4>Filters</h4>
+                <h5>Countries</h5>
+                <div class="checkbox-group" id="countryFilters">
+                    <label class="checkbox-label"><input type="checkbox" value="India"> India</label>
+                    <label class="checkbox-label"><input type="checkbox" value="USA"> USA</label>
+                    <label class="checkbox-label"><input type="checkbox" value="Japan"> Japan</label>
+                    <label class="checkbox-label"><input type="checkbox" value="Norway"> Norway</label>
+                    <label class="checkbox-label"><input type="checkbox" value="China"> China</label>
+                    <label class="checkbox-label"><input type="checkbox" value="Taiwan"> Taiwan</label>
+                    <label class="checkbox-label"><input type="checkbox" value="Thailand"> Thailand</label>
+                    <label class="checkbox-label"><input type="checkbox" value="Vietnam"> Vietnam</label>
+                    <label class="checkbox-label"><input type="checkbox" value="Korea"> Korea</label>
+                    <label class="checkbox-label"><input type="checkbox" value="Chile"> Chile</label>
+                    <label class="checkbox-label"><input type="checkbox" value="Singapore"> Singapore</label>
+                    <label class="checkbox-label"><input type="checkbox" value="New Zealand"> New Zealand</label>
+                    <label class="checkbox-label"><input type="checkbox" value="Indonesia"> Indonesia</label>
+                    <label class="checkbox-label"><input type="checkbox" value="Italy"> Italy</label>
+                    <label class="checkbox-label"><input type="checkbox" value="Poland"> Poland</label>
+                    <label class="checkbox-label"><input type="checkbox" value="Malaysia"> Malaysia</label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h5>Categories</h5>
+                <div class="checkbox-group" id="categoryFilters">
+                    <label class="checkbox-label"><input type="checkbox" value="chicken-cold-cuts"> Chicken Cold Cuts</label>
+                    <label class="checkbox-label"><input type="checkbox" value="pork-cold-cuts"> Pork Cold Cuts</label>
+                    <label class="checkbox-label"><input type="checkbox" value="pork-cured-fermented"> Pork Cured & Fermented</label>
+                    <label class="checkbox-label"><input type="checkbox" value="raw-pork"> Raw Pork</label>
+                    <label class="checkbox-label"><input type="checkbox" value="turkey-cold-cuts"> Turkey Cold Cuts</label>
+                    <label class="checkbox-label"><input type="checkbox" value="duck-cold-cuts"> Duck Cold Cuts</label>
+                    <label class="checkbox-label"><input type="checkbox" value="lamb-cold-cuts"> Lamb Cold Cuts</label>
+                    <label class="checkbox-label"><input type="checkbox" value="goat-meat"> Goat Meat</label>
+                    <label class="checkbox-label"><input type="checkbox" value="imported-seafood"> Imported Seafood</label>
+                    <label class="checkbox-label"><input type="checkbox" value="indian-seafood"> Indian Seafood</label>
+                    <label class="checkbox-label"><input type="checkbox" value="japanese-groceries"> Japanese Groceries</label>
+                    <label class="checkbox-label"><input type="checkbox" value="japanese-frozen-seafood"> Japanese Frozen Seafood</label>
+                    <label class="checkbox-label"><input type="checkbox" value="golden-wrap"> Golden Wrap</label>
+                    <label class="checkbox-label"><input type="checkbox" value="sakura-frozen"> Sakura Frozen</label>
+                </div>
+            </div>
+
+            <div class="filter-actions">
+                <button class="btn-apply" id="applyFiltersBtn">Apply</button>
+                <button class="btn-reset" id="resetFiltersBtn">Reset</button>
+            </div>
+        </aside>
+
+        <!-- Products Grid -->
+        <section class="products-area">
+            <div class="products-grid" id="productsGrid"></div>
+            <p class="empty-state hidden" id="emptyState">No products match your filters.</p>
+            <div class="pagination" id="pagination"></div>
+        </section>
+    </main>
+</body>
+</html>
