@@ -10,6 +10,61 @@ const closeSignupModal = document.getElementById('closeSignupModal');
 const switchToSignup = document.getElementById('switchToSignup');
 const switchToLogin = document.getElementById('switchToLogin');
 
+function resetPasswordToggles(scope) {
+    if (!scope) return;
+
+    scope.querySelectorAll('.password-wrapper input').forEach(input => {
+        input.type = 'password';
+    });
+
+    scope.querySelectorAll('.toggle-password i').forEach(icon => {
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    });
+}
+
+function resetSignupModalState() {
+    const signupForm = document.getElementById('signupForm');
+    const verifyForm = document.getElementById('verifyForm');
+    const signupError = document.getElementById('signupError');
+    const verifyError = document.getElementById('verifyError');
+    const verifySuccess = document.getElementById('verifySuccess');
+    const verifyEmailDisplay = document.getElementById('verifyEmailDisplay');
+    const verificationCode = document.getElementById('verificationCode');
+
+    if (signupForm) signupForm.style.display = 'flex';
+    if (verifyForm) {
+        verifyForm.style.display = 'none';
+        verifyForm.reset();
+    }
+    if (signupError) {
+        signupError.textContent = '';
+        signupError.style.display = 'none';
+    }
+    if (verifyError) {
+        verifyError.textContent = '';
+        verifyError.style.display = 'none';
+    }
+    if (verifySuccess) {
+        verifySuccess.textContent = '';
+        verifySuccess.style.display = 'none';
+    }
+    if (verifyEmailDisplay) {
+        verifyEmailDisplay.textContent = '';
+    }
+    if (verificationCode) {
+        verificationCode.value = '';
+    }
+
+    resetPasswordToggles(signupModal);
+}
+
+function openSignupModal() {
+    resetSignupModalState();
+    signupModal.classList.add('active');
+    overlay.classList.add('active');
+}
+
 if (loginBtn) loginBtn.addEventListener('click', () => {
     loginModal.classList.add('active');
     overlay.classList.add('active');
@@ -24,26 +79,21 @@ if (closeLoginModal) closeLoginModal.addEventListener('click', () => {
     overlay.classList.remove('active');
 });
 if (signupBtn) signupBtn.addEventListener('click', () => {
-    signupModal.classList.add('active');
-    overlay.classList.add('active');
+    openSignupModal();
 });
 if (signupBtnMobile) signupBtnMobile.addEventListener('click', () => {
-    signupModal.classList.add('active');
-    overlay.classList.add('active');
+    openSignupModal();
     sideMenu.classList.remove('active');
 });
 if (closeSignupModal) closeSignupModal.addEventListener('click', () => {
     signupModal.classList.remove('active');
     overlay.classList.remove('active');
-    const vf = document.getElementById('verifyForm');
-    const sf = document.getElementById('signupForm');
-    if (vf) vf.style.display = 'none';
-    if (sf) sf.style.display = 'block';
+    resetSignupModalState();
 });
 if (switchToSignup) switchToSignup.addEventListener('click', (e) => {
     e.preventDefault();
     loginModal.classList.remove('active');
-    signupModal.classList.add('active');
+    openSignupModal();
 });
 if (switchToLogin) switchToLogin.addEventListener('click', (e) => {
     e.preventDefault();
@@ -69,6 +119,16 @@ function closeSideMenu() {
 
 closeMenuBtn.addEventListener('click', closeSideMenu);
 overlay.addEventListener('click', closeSideMenu);
+
+overlay.addEventListener('click', () => {
+    if (loginModal) {
+        loginModal.classList.remove('active');
+    }
+    if (signupModal && signupModal.classList.contains('active')) {
+        signupModal.classList.remove('active');
+        resetSignupModalState();
+    }
+});
 
 document.querySelectorAll('.side-link').forEach(link => {
     link.addEventListener('click', closeSideMenu);

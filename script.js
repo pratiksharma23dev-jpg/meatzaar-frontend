@@ -31,6 +31,64 @@ const closeSignupModal = document.getElementById('closeSignupModal');
 
 const switchToSignup = document.getElementById('switchToSignup');
 const switchToLogin = document.getElementById('switchToLogin');
+let pendingSignupEmail = '';
+
+function resetPasswordToggles(scope) {
+    if (!scope) return;
+
+    scope.querySelectorAll('.password-wrapper input').forEach(input => {
+        input.type = 'password';
+    });
+
+    scope.querySelectorAll('.toggle-password i').forEach(icon => {
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    });
+}
+
+function resetSignupModalState() {
+    const signupFormEl = document.getElementById('signupForm');
+    const verifyFormEl = document.getElementById('verifyForm');
+    const signupError = document.getElementById('signupError');
+    const verifyError = document.getElementById('verifyError');
+    const verifySuccess = document.getElementById('verifySuccess');
+    const verifyEmailDisplay = document.getElementById('verifyEmailDisplay');
+    const verificationCode = document.getElementById('verificationCode');
+
+    if (signupFormEl) signupFormEl.style.display = 'flex';
+    if (verifyFormEl) {
+        verifyFormEl.style.display = 'none';
+        verifyFormEl.reset();
+    }
+
+    if (signupError) {
+        signupError.textContent = '';
+        signupError.style.display = 'none';
+    }
+    if (verifyError) {
+        verifyError.textContent = '';
+        verifyError.style.display = 'none';
+    }
+    if (verifySuccess) {
+        verifySuccess.textContent = '';
+        verifySuccess.style.display = 'none';
+    }
+    if (verifyEmailDisplay) {
+        verifyEmailDisplay.textContent = '';
+    }
+    if (verificationCode) {
+        verificationCode.value = '';
+    }
+
+    pendingSignupEmail = '';
+    resetPasswordToggles(signupModal);
+}
+
+function openSignupModal() {
+    resetSignupModalState();
+    signupModal.classList.add('active');
+    overlay.classList.add('active');
+}
 
 // ==================== SIDE MENU ==================== 
 menuToggle.addEventListener('click', () => {
@@ -51,6 +109,7 @@ overlay.addEventListener('click', () => {
     }
     if (signupModal.classList.contains('active')) {
         signupModal.classList.remove('active');
+        resetSignupModalState();
     }
 });
 
@@ -78,8 +137,7 @@ if (urlAction === 'login') {
     loginModal.classList.add('active');
     overlay.classList.add('active');
 } else if (urlAction === 'signup') {
-    signupModal.classList.add('active');
-    overlay.classList.add('active');
+    openSignupModal();
 }
 
 // Login Modal
@@ -101,31 +159,25 @@ closeLoginModal.addEventListener('click', () => {
 
 // Sign Up Modal
 signupBtn.addEventListener('click', () => {
-    signupModal.classList.add('active');
-    overlay.classList.add('active');
+    openSignupModal();
 });
 
 signupBtnMobile.addEventListener('click', () => {
-    signupModal.classList.add('active');
-    overlay.classList.add('active');
+    openSignupModal();
     sideMenu.classList.remove('active');
 });
 
 closeSignupModal.addEventListener('click', () => {
     signupModal.classList.remove('active');
     overlay.classList.remove('active');
-    // Reset to step 1
-    const vf = document.getElementById('verifyForm');
-    const sf = document.getElementById('signupForm');
-    if (vf) vf.style.display = 'none';
-    if (sf) sf.style.display = 'block';
+    resetSignupModalState();
 });
 
 // Switch between Login and Sign Up
 switchToSignup.addEventListener('click', (e) => {
     e.preventDefault();
     loginModal.classList.remove('active');
-    signupModal.classList.add('active');
+    openSignupModal();
 });
 
 switchToLogin.addEventListener('click', (e) => {
@@ -171,7 +223,6 @@ if (loginForm) {
 // Signup Form — Step 1: Send verification code
 const signupForm = document.getElementById('signupForm');
 const verifyForm = document.getElementById('verifyForm');
-let pendingSignupEmail = '';
 
 if (signupForm) {
     signupForm.addEventListener('submit', async (e) => {
