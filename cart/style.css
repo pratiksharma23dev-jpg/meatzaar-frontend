@@ -53,6 +53,7 @@ header {
     font-family: 'Sekuya', sans-serif;
     color: var(--primary-color);
     font-size: 1.8rem;
+    text-decoration: none;
 }
 
 nav {

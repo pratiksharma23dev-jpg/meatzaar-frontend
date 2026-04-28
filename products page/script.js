@@ -149,3 +149,21 @@ if (typeof MeatzaarAuth !== 'undefined' && MeatzaarAuth.isLoggedIn()) {
     if (authButtons) authButtons.style.display = '';
     if (profileLink) profileLink.style.display = 'none';
 }
+
+// ==================== CLICKABLE CATEGORY CARDS ====================
+const categoryCards = document.querySelectorAll('.category-card[data-href]');
+categoryCards.forEach(card => {
+    card.tabIndex = 0;
+    card.setAttribute('role', 'link');
+
+    card.addEventListener('click', () => {
+        window.location.href = card.dataset.href;
+    });
+
+    card.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            window.location.href = card.dataset.href;
+        }
+    });
+});
