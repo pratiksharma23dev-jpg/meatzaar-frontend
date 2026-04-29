@@ -62,11 +62,14 @@ document.addEventListener('DOMContentLoaded', () => {
     $('#addProductForm').addEventListener('submit', handleAddProduct);
 
     // Image preview
-    $('#prodImage').addEventListener('change', handleImagePreview);
-    $('#removeImg').addEventListener('click', () => {
-        $('#prodImage').value = '';
-        $('#imagePreview').classList.add('hidden');
-    });
+    $('#prodCardImage').addEventListener('change', handleImagePreview);
+    $('#prodProductImageOne').addEventListener('change', handleImagePreview);
+    $('#prodProductImageTwo').addEventListener('change', handleImagePreview);
+    $('#removeImg').addEventListener('click', clearImagePreview);
+    $('#editCardImage').addEventListener('change', handleEditImagePreview);
+    $('#editProductImageOne').addEventListener('change', handleEditImagePreview);
+    $('#editProductImageTwo').addEventListener('change', handleEditImagePreview);
+    $('#removeEditImg').addEventListener('click', clearEditImagePreview);
 
     // Edit product modal
     $('#editProductForm').addEventListener('submit', handleEditProduct);
@@ -152,8 +155,8 @@ function renderProducts() {
     tbody.innerHTML = filtered.map(p => `
         <tr>
             <td>
-                ${p.image
-                    ? `<img src="../${p.image}" class="product-img" alt="${escapeHtml(p.name)}">`
+                ${getProductImages(p).length
+                    ? `<img src="${getAdminImageSrc(getProductImages(p)[0])}" class="product-img" alt="${escapeHtml(p.name)}">`
                     : `<div class="no-img">No img</div>`
                 }
             </td>
@@ -241,6 +244,7 @@ function closeEditProductModal() {
     editingProductCode = '';
     $('#editProductModal').classList.add('hidden');
     $('#editProductForm').reset();
+    clearEditImagePreview();
     $('#editProductMsg').textContent = '';
     $('#editProductMsg').className = 'form-msg';
 }
@@ -270,18 +274,32 @@ async function handleEditProduct(e) {
         return;
     }
 
+    const editImages = getSelectedProductImages('#editCardImage', ['#editProductImageOne', '#editProductImageTwo']);
+    if (editImages.error) {
+        msg.textContent = editImages.error;
+        msg.classList.add('error');
+        return;
+    }
+
     const saveBtn = $('#saveEditBtn');
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
+    const body = new FormData();
+    body.append('name', name);
+    body.append('price', price);
+    body.append('description', description);
+    body.append('status', status);
+    if (editImages.cardImage) body.append('cardImage', editImages.cardImage);
+    editImages.productImages.forEach((file, index) => {
+        body.append(index === 0 ? 'productImageOne' : 'productImageTwo', file);
+    });
+
     try {
         const res = await fetch(`${API_BASE}/products/${encodeURIComponent(editingProductCode)}`, {
             method: 'PATCH',
-            headers: {
-                ...authHeaders(),
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ name, price, description, status })
+            headers: authHeaders(),
+            body
         });
         const data = await res.json();
 
@@ -290,7 +308,7 @@ async function handleEditProduct(e) {
             closeEditProductModal();
             loadProducts();
         } else {
-            msg.textContent = data.message || 'Failed to update product.';
+            msg.textContent = data.message || data.error || 'Failed to update product.';
             msg.classList.add('error');
         }
     } catch {
@@ -304,15 +322,79 @@ async function handleEditProduct(e) {
 
 // ==================== ADD PRODUCT ====================
 function handleImagePreview() {
-    const file = $('#prodImage').files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            $('#previewImg').src = e.target.result;
-            $('#imagePreview').classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
+    const selected = getSelectedProductImages('#prodCardImage', ['#prodProductImageOne', '#prodProductImageTwo']);
+    const previewGrid = $('#previewImages');
+    previewGrid.innerHTML = '';
+
+    if (selected.error) {
+        showToast(selected.error, 'error');
+        clearImagePreview();
+        return;
     }
+
+    const files = getPreviewFiles(selected);
+    if (files.length) {
+        $('#imagePreview').classList.remove('hidden');
+        files.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const item = document.createElement('div');
+                item.className = 'image-preview-item';
+                item.innerHTML = `
+                    <img src="${e.target.result}" alt="Product preview ${index + 1}">
+                    ${index === 0 ? '<span>Cover image</span>' : ''}
+                `;
+                previewGrid.appendChild(item);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+}
+
+function clearImagePreview() {
+    $('#prodCardImage').value = '';
+    $('#prodProductImageOne').value = '';
+    $('#prodProductImageTwo').value = '';
+    $('#previewImages').innerHTML = '';
+    $('#imagePreview').classList.add('hidden');
+}
+
+function handleEditImagePreview() {
+    const selected = getSelectedProductImages('#editCardImage', ['#editProductImageOne', '#editProductImageTwo']);
+    const previewGrid = $('#editPreviewImages');
+    previewGrid.innerHTML = '';
+
+    if (selected.error) {
+        showToast(selected.error, 'error');
+        clearEditImagePreview();
+        return;
+    }
+
+    const files = getPreviewFiles(selected);
+    if (files.length) {
+        $('#editImagePreview').classList.remove('hidden');
+        files.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const item = document.createElement('div');
+                item.className = 'image-preview-item';
+                item.innerHTML = `
+                    <img src="${e.target.result}" alt="Replacement preview ${index + 1}">
+                    ${index === 0 ? '<span>Cover image</span>' : ''}
+                `;
+                previewGrid.appendChild(item);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+}
+
+function clearEditImagePreview() {
+    $('#editCardImage').value = '';
+    $('#editProductImageOne').value = '';
+    $('#editProductImageTwo').value = '';
+    $('#editPreviewImages').innerHTML = '';
+    $('#editImagePreview').classList.add('hidden');
 }
 
 async function handleAddProduct(e) {
@@ -331,8 +413,16 @@ async function handleAddProduct(e) {
     form.append('description', $('#prodDescription').value.trim());
     form.append('status', $('#prodStatus').value);
 
-    const file = $('#prodImage').files[0];
-    if (file) form.append('image', file);
+    const selected = getSelectedProductImages('#prodCardImage', ['#prodProductImageOne', '#prodProductImageTwo']);
+    if (selected.error) {
+        msg.textContent = selected.error;
+        msg.classList.add('error');
+        return;
+    }
+    if (selected.cardImage) form.append('cardImage', selected.cardImage);
+    selected.productImages.forEach((file, index) => {
+        form.append(index === 0 ? 'productImageOne' : 'productImageTwo', file);
+    });
 
     try {
         const res = await fetch(`${API_BASE}/products`, {
@@ -346,11 +436,11 @@ async function handleAddProduct(e) {
             msg.classList.add('success');
             showToast(`Product added: ${data.product.code}`, 'success');
             $('#addProductForm').reset();
-            $('#imagePreview').classList.add('hidden');
+            clearImagePreview();
             $('#prodCountry').value = 'India';
             loadProducts();
         } else {
-            msg.textContent = data.message || 'Failed to add product.';
+            msg.textContent = data.message || data.error || 'Failed to add product.';
             msg.classList.add('error');
         }
     } catch {
@@ -472,6 +562,46 @@ function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+}
+
+function getProductImages(product) {
+    if (Array.isArray(product.images) && product.images.length) {
+        return product.images.filter(Boolean);
+    }
+    return product.image ? [product.image] : [];
+}
+
+function getAdminImageSrc(imagePath) {
+    return /^https?:\/\//i.test(imagePath) ? imagePath : `../${imagePath}`;
+}
+
+function getSelectedProductImages(cardSelector, productSelectors) {
+    const cardImage = $(cardSelector).files[0] || null;
+    const selectors = Array.isArray(productSelectors) ? productSelectors : [productSelectors];
+    const productImages = selectors.flatMap(selector => Array.from($(selector).files || []));
+    const allFiles = [...(cardImage ? [cardImage] : []), ...productImages];
+
+    if (productImages.length > 2) {
+        return { error: 'Upload a maximum of 2 product page photos besides the card image.' };
+    }
+
+    if (allFiles.length > 3) {
+        return { error: 'Upload a maximum of 3 PNG images in total.' };
+    }
+
+    const hasInvalidFile = allFiles.some(file => file.type !== 'image/png' || !file.name.toLowerCase().endsWith('.png'));
+    if (hasInvalidFile) {
+        return { error: 'Only PNG images are allowed.' };
+    }
+
+    return { cardImage, productImages };
+}
+
+function getPreviewFiles(selected) {
+    return [
+        ...(selected.cardImage ? [selected.cardImage] : []),
+        ...selected.productImages
+    ];
 }
 
 function showToast(text, type) {

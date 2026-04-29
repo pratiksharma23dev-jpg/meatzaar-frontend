@@ -483,6 +483,11 @@ const productData = {
 const imgBase = typeof PRODUCT_IMG_BASE !== 'undefined' ? PRODUCT_IMG_BASE : '';
 const productCatalog = [];
 
+function _resolveProductImage(imagePath) {
+    if (!imagePath) return '';
+    return /^https?:\/\//i.test(imagePath) ? imagePath : imgBase + imagePath;
+}
+
 // Build fallback catalog from hardcoded data
 function _buildFallbackCatalog() {
     let counter = 0;
@@ -498,6 +503,7 @@ function _buildFallbackCatalog() {
                 weight: item[2],
                 price: item[3],
                 image: imgBase + data.img,
+                images: [imgBase + data.img],
                 status: item[5] || 'in-stock'
             });
         }
@@ -511,6 +517,8 @@ const productsReady = fetch(_apiBase + '/api/products')
     .then(res => res.ok ? res.json() : Promise.reject())
     .then(dbProducts => {
         dbProducts.forEach(p => {
+            const imagePaths = Array.isArray(p.images) && p.images.length ? p.images : (p.image ? [p.image] : []);
+            const images = imagePaths.map(_resolveProductImage);
             productCatalog.push({
                 id: p.code.toLowerCase(),
                 category: p.category,
@@ -519,7 +527,8 @@ const productsReady = fetch(_apiBase + '/api/products')
                 name: p.name,
                 weight: p.weight || '',
                 price: p.price,
-                image: imgBase + (p.image || ''),
+                image: images[0] || '',
+                images,
                 status: p.status || 'in-stock'
             });
         });

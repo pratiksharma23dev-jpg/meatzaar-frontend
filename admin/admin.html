@@ -163,9 +163,19 @@
                             <option value="out-of-stock">Out of Stock</option>
                         </select>
                     </div>
+                </div>
+
+                <div class="form-row image-upload-row">
                     <div class="form-group">
-                        <label for="prodImage">Product Image</label>
-                        <input type="file" id="prodImage" name="image" accept="image/jpeg,image/png,image/webp">
+                        <label for="prodCardImage">Cover Image (PNG only)</label>
+                        <input type="file" id="prodCardImage" name="cardImage" accept="image/png">
+                    </div>
+                    <div class="form-group">
+                        <label for="prodProductImages">Product Page Photos (PNG only, 2 max)</label>
+                        <div class="split-upload-fields">
+                            <input type="file" id="prodProductImageOne" name="productImageOne" accept="image/png">
+                            <input type="file" id="prodProductImageTwo" name="productImageTwo" accept="image/png">
+                        </div>
                     </div>
                 </div>
 
@@ -176,7 +186,7 @@
 
                 <div class="form-group full-width">
                     <div class="image-preview hidden" id="imagePreview">
-                        <img id="previewImg" src="" alt="Preview">
+                        <div class="image-preview-grid" id="previewImages"></div>
                         <button type="button" class="btn-remove-img" id="removeImg">
                             <i class="fas fa-times"></i>
                         </button>
@@ -242,6 +252,27 @@
                 <div class="form-group">
                     <label for="editProdDescription">Description</label>
                     <textarea id="editProdDescription" rows="4" placeholder="Product description..."></textarea>
+                </div>
+                <div class="form-row image-upload-row">
+                    <div class="form-group">
+                        <label for="editCardImage">Replace Cover Image (PNG only)</label>
+                        <input type="file" id="editCardImage" name="cardImage" accept="image/png">
+                    </div>
+                    <div class="form-group">
+                        <label for="editProductImages">Replace Product Page Photos (PNG only, 2 max)</label>
+                        <div class="split-upload-fields">
+                            <input type="file" id="editProductImageOne" name="productImageOne" accept="image/png">
+                            <input type="file" id="editProductImageTwo" name="productImageTwo" accept="image/png">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <div class="image-preview hidden" id="editImagePreview">
+                        <div class="image-preview-grid" id="editPreviewImages"></div>
+                        <button type="button" class="btn-remove-img" id="removeEditImg">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-outline" id="cancelEditBtn">Cancel</button>

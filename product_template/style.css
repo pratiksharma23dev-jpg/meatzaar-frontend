@@ -191,12 +191,23 @@ body::after {
     box-shadow: 0 18px 45px var(--shadow-color);
 }
 
-.product-image-section img {
+.product-image-gallery {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+}
+
+.product-image-gallery img {
+    flex: 0 0 100%;
     width: 100%;
-    min-height: 550px;
-    object-fit: cover;
+    height: min(550px, 68vh);
+    min-height: 360px;
+    object-fit: contain;
     border-radius: 18px;
     display: block;
+    scroll-snap-align: start;
 }
 
 .image-badge {

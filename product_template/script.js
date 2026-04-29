@@ -7,7 +7,7 @@ const buyNowBtn = document.getElementById('buyNowBtn');
 const quantityInput = document.getElementById('quantity');
 const feedbackMessage = document.getElementById('feedbackMessage');
 const productBadge = document.getElementById('productBadge');
-const productImage = document.getElementById('productImage');
+const productImageGallery = document.getElementById('productImageGallery');
 const productEyebrow = document.getElementById('productEyebrow');
 const productName = document.getElementById('productName');
 const productPrice = document.getElementById('productPrice');
@@ -89,6 +89,22 @@ function setStockBadge(status) {
     productStockStatus.classList.toggle('out-of-stock', !isInStock);
 }
 
+function getProductImages(product) {
+    if (Array.isArray(product.images) && product.images.length) {
+        return product.images.filter(Boolean);
+    }
+    return product.image ? [product.image] : [];
+}
+
+function renderProductImages(product) {
+    const images = getProductImages(product);
+    if (!productImageGallery || !images.length) return;
+
+    productImageGallery.innerHTML = images.map((image, index) => `
+        <img src="${image}" alt="${product.name}${images.length > 1 ? ` view ${index + 1}` : ''}" ${index === 0 ? 'id="productImage"' : ''}>
+    `).join('');
+}
+
 function loadProductDetails() {
     const params = new URLSearchParams(window.location.search);
     const productId = params.get('product');
@@ -104,8 +120,7 @@ function loadProductDetails() {
 
     document.title = `Meatzaar - ${product.name}`;
     productBadge.textContent = product.classification;
-    productImage.src = product.image;
-    productImage.alt = product.name;
+    renderProductImages(product);
     productEyebrow.textContent = catLabel;
     productName.textContent = product.name;
     productPrice.textContent = `\u20B9${product.price.toLocaleString()}`;
