@@ -210,6 +210,23 @@ body::after {
     scroll-snap-align: start;
 }
 
+.product-image-loading,
+.product-image-empty {
+    flex: 0 0 100%;
+    width: 100%;
+    height: min(550px, 68vh);
+    min-height: 360px;
+    border: 1px dashed var(--border-color);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted-color);
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 1rem;
+    text-align: center;
+}
+
 .image-badge {
     position: absolute;
     top: 2rem;

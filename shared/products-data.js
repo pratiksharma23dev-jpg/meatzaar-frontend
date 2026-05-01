@@ -517,8 +517,9 @@ const productsReady = fetch(_apiBase + '/api/products')
     .then(res => res.ok ? res.json() : Promise.reject())
     .then(dbProducts => {
         dbProducts.forEach(p => {
-            const imagePaths = Array.isArray(p.images) && p.images.length ? p.images : (p.image ? [p.image] : []);
-            const images = imagePaths.map(_resolveProductImage);
+            const imagePaths = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
+            if (!imagePaths.length && p.image) imagePaths.push(p.image);
+            const images = imagePaths.map(_resolveProductImage).filter(Boolean);
             productCatalog.push({
                 id: p.code.toLowerCase(),
                 category: p.category,

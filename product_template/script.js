@@ -96,13 +96,36 @@ function getProductImages(product) {
     return product.image ? [product.image] : [];
 }
 
+function renderNoProductImage() {
+    if (!productImageGallery) return;
+
+    productImageGallery.innerHTML = '<div class="product-image-empty">No image available</div>';
+}
+
 function renderProductImages(product) {
     const images = getProductImages(product);
-    if (!productImageGallery || !images.length) return;
+    if (!productImageGallery) return;
 
-    productImageGallery.innerHTML = images.map((image, index) => `
-        <img src="${image}" alt="${product.name}${images.length > 1 ? ` view ${index + 1}` : ''}" ${index === 0 ? 'id="productImage"' : ''}>
-    `).join('');
+    if (!images.length) {
+        renderNoProductImage();
+        return;
+    }
+
+    productImageGallery.innerHTML = '';
+
+    images.forEach((image, index) => {
+        const img = document.createElement('img');
+        img.src = image;
+        img.alt = `${product.name}${images.length > 1 ? ` view ${index + 1}` : ''}`;
+        if (index === 0) img.id = 'productImage';
+        img.addEventListener('error', () => {
+            img.remove();
+            if (!productImageGallery.querySelector('img')) {
+                renderNoProductImage();
+            }
+        });
+        productImageGallery.appendChild(img);
+    });
 }
 
 function loadProductDetails() {
@@ -113,6 +136,7 @@ function loadProductDetails() {
     if (!product) {
         productName.textContent = 'Product Not Found';
         productSummary.textContent = 'Sorry, the product you are looking for does not exist.';
+        renderNoProductImage();
         return;
     }
 

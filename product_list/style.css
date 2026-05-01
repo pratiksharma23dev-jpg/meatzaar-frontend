@@ -31,8 +31,9 @@ body {
 .header {
     background-color: var(--dark-color);
     padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr minmax(280px, 420px) 1fr;
+    gap: 1rem;
     align-items: center;
     position: sticky;
     top: 0;
@@ -44,6 +45,12 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
+    justify-self: start;
+}
+
+.header-center {
+    width: 100%;
+    justify-self: center;
 }
 
 .logo h1 {
@@ -57,6 +64,7 @@ body {
     display: flex;
     align-items: center;
     gap: 1.5rem;
+    justify-self: end;
 }
 
 .search-box {
@@ -67,7 +75,8 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background: var(--input-bg);
-    min-width: 250px;
+    width: 100%;
+    min-width: 0;
 }
 
 .search-box i {
@@ -657,10 +666,11 @@ body {
 @media (max-width: 768px) {
     .header {
         padding: 0.75rem 1rem;
+        grid-template-columns: 1fr minmax(180px, 320px) 1fr;
     }
 
     .search-box {
-        min-width: 160px;
+        min-width: 0;
     }
 
     .toolbar {
@@ -711,11 +721,27 @@ body {
     }
 
     .search-box {
-        min-width: 120px;
+        min-width: 0;
     }
 
     .header-right {
         gap: 0.75rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .header {
+        grid-template-columns: 1fr;
+    }
+
+    .header-left,
+    .header-center,
+    .header-right {
+        justify-self: stretch;
+    }
+
+    .header-left {
+        justify-content: center;
     }
 }
 
