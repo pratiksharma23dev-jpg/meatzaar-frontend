@@ -665,8 +665,30 @@ body {
 
 @media (max-width: 768px) {
     .header {
-        padding: 0.75rem 1rem;
-        grid-template-columns: 1fr minmax(180px, 320px) 1fr;
+        padding: 0.75rem 0 0.9rem;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .header-left {
+        width: 100%;
+        min-height: 42px;
+        justify-content: center;
+        justify-self: stretch;
+        position: relative;
+    }
+
+    .menu-toggle {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .header-center {
+        width: 100%;
+        padding: 0 0.75rem;
+        justify-self: stretch;
     }
 
     .search-box {
@@ -734,7 +756,6 @@ body {
         grid-template-columns: 1fr;
     }
 
-    .header-left,
     .header-center,
     .header-right {
         justify-self: stretch;

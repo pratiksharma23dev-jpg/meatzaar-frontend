@@ -357,7 +357,7 @@ payNowBtn.addEventListener('click', async () => {
     // Check if user is logged in
     if (typeof MeatzaarAuth !== 'undefined' && !MeatzaarAuth.isLoggedIn()) {
         alert('Please log in to place an order.');
-        window.location.href = '../landing page/index.html';
+        window.location.href = '/index.html';
         return;
     }
 
@@ -385,7 +385,7 @@ payNowBtn.addEventListener('click', async () => {
         }
 
         alert(`Order placed successfully!\n\nOrder ID: ${result.order.id}\nTotal: ₹${result.order.total.toFixed(2)}\n\nA confirmation email has been sent to your registered email.\n\nThank you for shopping at Meatzaar!`);
-        window.location.href = '../landing page/index.html';
+        window.location.href = '/index.html';
     } catch (err) {
         alert('Failed to place order: ' + err.message);
     } finally {

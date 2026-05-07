@@ -535,8 +535,24 @@ nav a:hover {
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
+    header {
+        justify-content: center;
+        position: relative;
+        padding: 0.75rem;
+    }
+
+    .header-left {
+        width: 100%;
+        min-height: 42px;
+        justify-content: center;
+    }
+
     .menu-toggle {
         display: block;
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
     }
 
     nav {

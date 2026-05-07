@@ -116,6 +116,10 @@ nav a:hover {
     gap: 1rem;
 }
 
+body:not(.auth-ui-ready) .auth-buttons {
+    visibility: hidden;
+}
+
 .btn {
     padding: 0.75rem 1.5rem;
     border: none;
@@ -167,6 +171,29 @@ nav a:hover {
 }
 
 @media (max-width: 768px) {
+    header {
+        padding: 0.75rem 0;
+    }
+
+    .header-container {
+        justify-content: center;
+        position: relative;
+        min-height: 42px;
+        padding: 0 0.75rem;
+    }
+
+    .header-left {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .menu-toggle {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
     .auth-buttons,
     .profile-link,
     .search-wrapper {

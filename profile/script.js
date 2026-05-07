@@ -35,6 +35,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const profileHeader = document.getElementById('profileHeader');
     const profileGrid = document.getElementById('profileGrid');
     const sideMenuAuthBtn = document.getElementById('loginBtnMobile');
+    const redirectHome = () => {
+        window.location.href = '/index.html';
+    };
 
     const isLoggedIn = typeof MeatzaarAuth !== 'undefined' && MeatzaarAuth.isLoggedIn();
 
@@ -44,12 +47,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             sideMenuAuthBtn.textContent = 'Logout';
             sideMenuAuthBtn.onclick = () => {
                 MeatzaarAuth.logout();
-                window.location.href = '../landing page/index.html';
+                redirectHome();
             };
         } else {
             sideMenuAuthBtn.textContent = 'Login';
             sideMenuAuthBtn.onclick = () => {
-                window.location.href = '../landing page/index.html';
+                window.location.href = '/index.html?action=login';
             };
         }
     }
@@ -84,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Logout button
     document.getElementById('profileLogoutBtn').addEventListener('click', () => {
         MeatzaarAuth.logout();
-        window.location.href = '../landing page/index.html';
+        redirectHome();
     });
 
     // Load cart from localStorage

@@ -62,6 +62,10 @@ body {
     gap: 1rem;
 }
 
+body:not(.auth-ui-ready) .auth-buttons {
+    visibility: hidden;
+}
+
 .menu-toggle {
     display: block;
     background: none;
@@ -553,6 +557,36 @@ body {
         display: none;
     }
 
+    .header {
+        padding: 0.75rem 0 0.9rem;
+    }
+
+    .header-container {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 0;
+    }
+
+    .header-left {
+        width: 100%;
+        min-height: 42px;
+        justify-content: center;
+        position: relative;
+    }
+
+    .menu-toggle {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .search-wrapper {
+        width: 100%;
+        padding: 0 0.75rem;
+    }
+
     .products-content {
         flex-direction: column;
     }
@@ -562,15 +596,12 @@ body {
     }
 
     .search-box {
+        width: 100%;
         min-width: 180px;
     }
 
     .search-dropdown {
         min-width: 260px;
-    }
-
-    .header-container {
-        padding: 0 1rem;
     }
 
     .logo h1 {

@@ -90,6 +90,10 @@ body::before {
     gap: 1rem;
 }
 
+body:not(.auth-ui-ready) .auth-buttons {
+    visibility: hidden;
+}
+
 .menu-toggle {
     display: block;
     background: none;
@@ -769,8 +773,39 @@ body {
 
 /* ==================== RESPONSIVE DESIGN ==================== */
 @media (max-width: 768px) {
+    body {
+        background-color: var(--primary-color);
+        background-image: none;
+    }
+
+    body::before {
+        display: none;
+    }
+
+    .header {
+        padding: 0.75rem 0 0.9rem;
+    }
+
+    .header-container {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 0;
+    }
+
+    .header-left {
+        width: 100%;
+        min-height: 42px;
+        justify-content: center;
+        position: relative;
+    }
+
     .menu-toggle {
         display: block;
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
     }
 
     .nav {
@@ -783,7 +818,11 @@ body {
 
     .hero {
         flex-direction: column;
-        padding: 2rem 1rem;
+        padding: 8.5rem 1rem 2rem;
+        background-color: var(--primary-color);
+        min-height: 100vh;
+        justify-content: center;
+        text-align: center;
     }
 
     .hero-content h2 {
@@ -809,10 +848,6 @@ body {
 
     .image-placeholder {
         font-size: 5rem;
-    }
-
-    .header-container {
-        padding: 0 1rem;
     }
 
     .logo h1 {
@@ -952,7 +987,13 @@ body {
 }
 
 @media (max-width: 768px) {
+    .search-wrapper {
+        width: 100%;
+        padding: 0 0.75rem;
+    }
+
     .search-box {
+        width: 100%;
         min-width: 180px;
     }
 

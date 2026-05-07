@@ -22,7 +22,7 @@ const MIME_TYPES = {
 function safeResolve(urlPath) {
     const cleanPath = decodeURIComponent(urlPath.split('?')[0]);
     const relPath = cleanPath === '/'
-        ? 'landing page/index.html'
+        ? 'index.html'
         : cleanPath.replace(/^\/+/, '');
 
     const normalized = path.normalize(relPath);
@@ -42,7 +42,7 @@ const server = http.createServer((req, res) => {
     fs.stat(filePath, (statErr, stats) => {
         let targetPath;
         if (statErr) {
-            // Fallback: serve index.html for unknown routes (SPA/landing page)
+            // Fallback: serve index.html for unknown routes.
             targetPath = path.join(ROOT, 'index.html');
         } else {
             targetPath = stats.isDirectory()

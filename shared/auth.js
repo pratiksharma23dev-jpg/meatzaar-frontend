@@ -167,16 +167,77 @@ const MeatzaarAuth = {
 function updateAuthUI() {
     const isLoggedIn = MeatzaarAuth.isLoggedIn();
     const user = MeatzaarAuth.getUser();
+    const sideNav = document.querySelector('.side-nav');
+    const hasLocalAuthModals = !!(document.getElementById('loginModal') && document.getElementById('signupModal'));
+
+    const ensureSideDivider = () => {
+        if (!sideNav) return null;
+        let divider = sideNav.querySelector('hr');
+        if (!divider) {
+            divider = document.createElement('hr');
+            sideNav.appendChild(divider);
+        }
+        return divider;
+    };
+
+    const createSideAuthButton = (id, className, text, action) => {
+        const button = document.createElement('button');
+        button.className = className;
+        button.id = id;
+        button.textContent = text;
+        button.addEventListener('click', () => {
+            window.location.href = `/index.html?action=${action}`;
+        });
+        return button;
+    };
+
+    const sessionControlsHTML = (profilePath, cartPath, avatarUrl, firstName, cartBadgeHTML) => `
+        <a href="${profilePath}" class="user-avatar-link" aria-label="Profile">
+            <span class="user-greeting">Hi, ${firstName}</span>
+            <img src="${avatarUrl}" alt="Profile" class="user-avatar">
+        </a>
+        <a href="${cartPath}" class="nav-cart-link" aria-label="Cart">
+            <i class="fas fa-shopping-cart"></i>
+            ${cartBadgeHTML}
+        </a>
+    `;
 
     // Inject shared nav styles (always needed for cart icon)
     const style = document.createElement('style');
     style.textContent = `
+        :root {
+            --session-icon-gap: 0.65rem;
+            --session-avatar-size: 38px;
+            --session-cart-size: 1.25rem;
+            --session-badge-size: 18px;
+            --session-badge-font: 0.65rem;
+        }
         .user-avatar-link {
             display: flex;
             align-items: center;
             text-decoration: none;
             margin-left: auto;
             gap: 0.5rem;
+        }
+        .auth-buttons.auth-session-controls,
+        .shared-auth-session-controls {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: var(--session-icon-gap);
+            margin-left: auto;
+            flex-wrap: nowrap;
+        }
+        .auth-buttons.auth-session-controls .user-avatar-link,
+        .shared-auth-session-controls .user-avatar-link {
+            margin-left: 0;
+            gap: 0.5rem;
+            flex: 0 0 auto;
+        }
+        .auth-buttons.auth-session-controls .nav-cart-link,
+        .shared-auth-session-controls .nav-cart-link {
+            margin-left: 0;
+            flex: 0 0 auto;
         }
         .user-greeting {
             color: #fff;
@@ -185,8 +246,8 @@ function updateAuthUI() {
             white-space: nowrap;
         }
         .user-avatar {
-            width: 38px;
-            height: 38px;
+            width: var(--session-avatar-size);
+            height: var(--session-avatar-size);
             border-radius: 50%;
             border: 2px solid #FF7300;
             cursor: pointer;
@@ -202,7 +263,7 @@ function updateAuthUI() {
             align-items: center;
             text-decoration: none;
             color: #fff;
-            font-size: 1.25rem;
+            font-size: var(--session-cart-size);
             margin-left: 0.75rem;
             transition: color 0.3s ease;
         }
@@ -215,10 +276,10 @@ function updateAuthUI() {
             right: -10px;
             background-color: #FF7300;
             color: #fff;
-            font-size: 0.65rem;
+            font-size: var(--session-badge-font);
             font-weight: 700;
-            min-width: 18px;
-            height: 18px;
+            min-width: var(--session-badge-size);
+            height: var(--session-badge-size);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -244,6 +305,83 @@ function updateAuthUI() {
         .side-logout-btn:hover {
             background-color: #e74c3c;
             color: #fff;
+        }
+        @media (min-width: 769px) {
+            .auth-session-host.auth-session-search-host {
+                gap: 1.5rem;
+            }
+            .auth-session-host.auth-session-search-host .search-wrapper {
+                margin-left: 0;
+                margin-right: 0;
+            }
+            .auth-session-host.auth-session-search-host .auth-buttons.auth-session-controls {
+                width: 210px;
+                min-width: 210px;
+                margin-left: 0;
+            }
+        }
+        @media (max-width: 768px) {
+            :root {
+                --session-icon-gap: 0.45rem;
+                --session-avatar-size: 30px;
+                --session-cart-size: 1.05rem;
+                --session-badge-size: 15px;
+                --session-badge-font: 0.55rem;
+            }
+            .logo h1 {
+                font-size: 1.4rem !important;
+            }
+            .auth-session-host {
+                position: relative;
+            }
+            .auth-buttons.auth-session-controls,
+            .shared-auth-session-controls {
+                display: flex !important;
+                align-items: center;
+                gap: var(--session-icon-gap);
+                position: absolute;
+                top: 50%;
+                right: 0.55rem;
+                transform: translateY(-50%);
+                z-index: 105;
+                flex-wrap: nowrap;
+                max-width: 72px;
+            }
+            .auth-session-host.auth-session-search-host > .auth-buttons.auth-session-controls,
+            .auth-session-host.auth-session-search-host > .shared-auth-session-controls {
+                top: 0.35rem;
+                transform: none;
+            }
+            header.auth-session-host.auth-session-search-host > .auth-buttons.auth-session-controls,
+            header.auth-session-host.auth-session-search-host > .shared-auth-session-controls {
+                top: calc(0.75rem + 21px);
+                transform: translateY(-50%);
+            }
+            .auth-buttons.auth-session-controls .user-greeting,
+            .shared-auth-session-controls .user-greeting {
+                display: none;
+            }
+            .auth-buttons.auth-session-controls .user-avatar-link,
+            .shared-auth-session-controls .user-avatar-link {
+                gap: 0;
+            }
+            .auth-buttons.auth-session-controls .cart-badge,
+            .shared-auth-session-controls .cart-badge {
+                top: -6px;
+                right: -8px;
+            }
+        }
+        @media (max-width: 380px) {
+            :root {
+                --session-icon-gap: 0.35rem;
+                --session-avatar-size: 28px;
+                --session-cart-size: 1rem;
+            }
+            .auth-buttons.auth-session-controls,
+            .shared-auth-session-controls {
+                right: 0.45rem;
+                max-width: 64px;
+            }
         }
     `;
     document.head.appendChild(style);
@@ -273,32 +411,26 @@ function updateAuthUI() {
         const authButtons = document.querySelector('.auth-buttons');
 
         if (authButtons) {
-            authButtons.innerHTML = `
-                <a href="${profilePath}" class="user-avatar-link">
-                    <span class="user-greeting">Hi, ${firstName}</span>
-                    <img src="${avatarUrl}" alt="Profile" class="user-avatar">
-                </a>
-                <a href="${cartPath}" class="nav-cart-link">
-                    <i class="fas fa-shopping-cart"></i>
-                    ${cartBadgeHTML}
-                </a>
-            `;
+            if (authButtons.parentElement) {
+                authButtons.parentElement.classList.add('auth-session-host');
+                if (authButtons.parentElement.querySelector('.search-wrapper')) {
+                    authButtons.parentElement.classList.add('auth-session-search-host');
+                }
+            }
+            authButtons.classList.add('auth-session-controls');
+            authButtons.innerHTML = sessionControlsHTML(profilePath, cartPath, avatarUrl, firstName, cartBadgeHTML);
         } else if (container && !container.querySelector('.user-avatar-link')) {
-            const avatarLink = document.createElement('a');
-            avatarLink.href = profilePath;
-            avatarLink.className = 'user-avatar-link';
-            avatarLink.innerHTML = `<span class="user-greeting">Hi, ${firstName}</span><img src="${avatarUrl}" alt="Profile" class="user-avatar">`;
-            container.appendChild(avatarLink);
-
-            const cartEl = document.createElement('a');
-            cartEl.href = cartPath;
-            cartEl.className = 'nav-cart-link';
-            cartEl.innerHTML = `<i class="fas fa-shopping-cart"></i>${cartBadgeHTML}`;
-            container.appendChild(cartEl);
+            container.classList.add('auth-session-host');
+            if (container.querySelector('.search-wrapper')) {
+                container.classList.add('auth-session-search-host');
+            }
+            const controls = document.createElement('div');
+            controls.className = 'shared-auth-session-controls';
+            controls.innerHTML = sessionControlsHTML(profilePath, cartPath, avatarUrl, firstName, cartBadgeHTML);
+            container.appendChild(controls);
         }
 
         // --- Side menu: replace login/signup with logout ---
-        const sideNav = document.querySelector('.side-nav');
         if (sideNav) {
             const loginBtnMobile = document.getElementById('loginBtnMobile');
             const signupBtnMobile = document.getElementById('signupBtnMobile');
@@ -306,20 +438,55 @@ function updateAuthUI() {
             if (signupBtnMobile) signupBtnMobile.remove();
 
             if (!sideNav.querySelector('.side-logout-btn')) {
-                if (!sideNav.querySelector('hr')) {
-                    sideNav.appendChild(document.createElement('hr'));
-                }
+                ensureSideDivider();
                 const logoutBtn = document.createElement('button');
                 logoutBtn.className = 'side-logout-btn';
                 logoutBtn.textContent = 'Logout';
                 logoutBtn.addEventListener('click', () => {
                     MeatzaarAuth.logout();
-                    window.location.reload();
+                    window.location.href = '/index.html';
                 });
                 sideNav.appendChild(logoutBtn);
             }
         }
+    } else if (sideNav) {
+        const authButtons = document.querySelector('.auth-buttons.auth-session-controls');
+        if (authButtons) authButtons.classList.remove('auth-session-controls');
+        document.querySelectorAll('.shared-auth-session-controls').forEach(el => el.remove());
+
+        const logoutBtn = sideNav.querySelector('.side-logout-btn');
+        if (logoutBtn) logoutBtn.remove();
+
+        ensureSideDivider();
+
+        let loginBtnMobile = document.getElementById('loginBtnMobile');
+        if (!loginBtnMobile) {
+            loginBtnMobile = createSideAuthButton('loginBtnMobile', 'btn btn-login btn-full', 'Login', 'login');
+            sideNav.appendChild(loginBtnMobile);
+        } else {
+            loginBtnMobile.textContent = 'Login';
+            if (!hasLocalAuthModals) {
+                loginBtnMobile.onclick = () => {
+                    window.location.href = '/index.html?action=login';
+                };
+            }
+        }
+
+        let signupBtnMobile = document.getElementById('signupBtnMobile');
+        if (!signupBtnMobile) {
+            signupBtnMobile = createSideAuthButton('signupBtnMobile', 'btn btn-signup btn-full', 'Sign Up', 'signup');
+            sideNav.appendChild(signupBtnMobile);
+        } else {
+            signupBtnMobile.textContent = 'Sign Up';
+            if (!hasLocalAuthModals) {
+                signupBtnMobile.onclick = () => {
+                    window.location.href = '/index.html?action=signup';
+                };
+            }
+        }
     }
+
+    document.body.classList.add('auth-ui-ready');
 }
 
 // Run on page load

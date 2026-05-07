@@ -9,6 +9,7 @@ const closeLoginModal = document.getElementById('closeLoginModal');
 const closeSignupModal = document.getElementById('closeSignupModal');
 const switchToSignup = document.getElementById('switchToSignup');
 const switchToLogin = document.getElementById('switchToLogin');
+let pendingSignupEmail = '';
 
 function resetPasswordToggles(scope) {
     if (!scope) return;
@@ -99,6 +100,127 @@ if (switchToLogin) switchToLogin.addEventListener('click', (e) => {
     e.preventDefault();
     signupModal.classList.remove('active');
     loginModal.classList.add('active');
+});
+
+document.querySelectorAll('.toggle-password').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const input = btn.parentElement.querySelector('input');
+        const icon = btn.querySelector('i');
+        input.type = input.type === 'password' ? 'text' : 'password';
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    });
+});
+
+const loginForm = document.getElementById('loginForm');
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorEl = document.getElementById('loginError');
+        if (errorEl) errorEl.style.display = 'none';
+
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Logging in...';
+
+        try {
+            await MeatzaarAuth.login(
+                document.getElementById('loginEmail').value.trim(),
+                document.getElementById('loginPassword').value
+            );
+            window.location.reload();
+        } catch (err) {
+            if (errorEl) {
+                errorEl.textContent = err.message;
+                errorEl.style.display = 'block';
+            }
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Login';
+        }
+    });
+}
+
+const signupForm = document.getElementById('signupForm');
+const verifyForm = document.getElementById('verifyForm');
+if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorEl = document.getElementById('signupError');
+        if (errorEl) errorEl.style.display = 'none';
+
+        const name = document.getElementById('signupName').value.trim();
+        const email = document.getElementById('signupEmail').value.trim();
+        const password = document.getElementById('signupPassword').value;
+        const confirmPassword = document.getElementById('signupConfirm').value;
+
+        if (password !== confirmPassword) {
+            if (errorEl) {
+                errorEl.textContent = 'Passwords do not match.';
+                errorEl.style.display = 'block';
+            }
+            return;
+        }
+
+        const submitBtn = signupForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending code...';
+
+        try {
+            await MeatzaarAuth.sendVerification(name, email, password, confirmPassword);
+            pendingSignupEmail = email;
+            signupForm.style.display = 'none';
+            verifyForm.style.display = 'block';
+            document.getElementById('verifyEmailDisplay').textContent = email;
+            document.getElementById('verificationCode').focus();
+        } catch (err) {
+            if (errorEl) {
+                errorEl.textContent = err.message;
+                errorEl.style.display = 'block';
+            }
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Send Verification Code';
+        }
+    });
+}
+
+if (verifyForm) {
+    verifyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorEl = document.getElementById('verifyError');
+        if (errorEl) errorEl.style.display = 'none';
+
+        const submitBtn = verifyForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verifying...';
+
+        try {
+            await MeatzaarAuth.signup(pendingSignupEmail, document.getElementById('verificationCode').value.trim());
+            window.location.reload();
+        } catch (err) {
+            if (errorEl) {
+                errorEl.textContent = err.message;
+                errorEl.style.display = 'block';
+            }
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Verify & Create Account';
+        }
+    });
+}
+
+const backToSignup = document.getElementById('backToSignup');
+if (backToSignup) backToSignup.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (verifyForm) verifyForm.style.display = 'none';
+    if (signupForm) signupForm.style.display = 'flex';
+});
+
+const resendCode = document.getElementById('resendCode');
+if (resendCode) resendCode.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (signupForm) signupForm.requestSubmit();
 });
 // DOM Elements
 const menuToggle = document.getElementById('menuToggle');
