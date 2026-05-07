@@ -177,6 +177,7 @@ function updateAuthUI() {
             divider = document.createElement('hr');
             sideNav.appendChild(divider);
         }
+        divider.classList.add('side-auth-divider');
         return divider;
     };
 
@@ -184,6 +185,7 @@ function updateAuthUI() {
         const button = document.createElement('button');
         button.className = className;
         button.id = id;
+        button.type = 'button';
         button.textContent = text;
         button.addEventListener('click', () => {
             window.location.href = `/index.html?action=${action}`;
@@ -289,22 +291,63 @@ function updateAuthUI() {
         .cart-badge.hidden {
             display: none;
         }
+        .side-nav .side-auth-divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+            width: 100%;
+            margin: 0.75rem 0 0.25rem;
+        }
+        .side-nav #loginBtnMobile,
+        .side-nav #signupBtnMobile,
         .side-logout-btn {
-            background: none;
-            border: 2px solid #e74c3c;
-            color: #e74c3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
             padding: 0.75rem 1.5rem;
             border-radius: 5px;
             font-weight: 600;
-            width: 100%;
-            cursor: pointer;
             font-size: 1rem;
+            line-height: 1.2;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            margin: 0.35rem 0 0;
             transition: all 0.3s ease;
-            margin-top: 1rem;
+        }
+        .side-nav #loginBtnMobile {
+            background: transparent;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+        }
+        .side-nav #loginBtnMobile:hover {
+            background: #ffffff;
+            color: #1a1a1a;
+        }
+        .side-nav #signupBtnMobile {
+            background: #FF7300;
+            border: 2px solid #FF7300;
+            color: #ffffff;
+        }
+        .side-nav #signupBtnMobile:hover {
+            background: #ffffff;
+            border-color: #ffffff;
+            color: #1a1a1a;
+        }
+        .side-logout-btn {
+            background: transparent;
+            border: 2px solid #e74c3c;
+            color: #e74c3c;
         }
         .side-logout-btn:hover {
             background-color: #e74c3c;
             color: #fff;
+        }
+        .side-nav #loginBtnMobile + #signupBtnMobile {
+            margin-top: 0.65rem;
+        }
+        .side-nav .btn-full {
+            width: 100%;
         }
         @media (min-width: 769px) {
             .auth-session-host.auth-session-search-host {
