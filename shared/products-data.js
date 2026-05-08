@@ -512,30 +512,44 @@ function _buildFallbackCatalog() {
 
 // Fetch products from the database (primary source)
 const _apiBase = window.BASE_URL || '';
+const _apiFallbackBases = window.API_FALLBACK_BASES || [];
 
-const productsReady = fetch(_apiBase + '/api/products')
-    .then(res => res.ok ? res.json() : Promise.reject())
-    .then(dbProducts => {
-        dbProducts.forEach(p => {
-            const imagePaths = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
-            if (!imagePaths.length && p.image) imagePaths.push(p.image);
-            const images = imagePaths.map(_resolveProductImage).filter(Boolean);
-            productCatalog.push({
-                id: p.code.toLowerCase(),
-                category: p.category,
-                classification: p.classification || '',
-                country: p.country || 'India',
-                name: p.name,
-                weight: p.weight || '',
-                price: p.price,
-                image: images[0] || '',
-                images,
-                status: p.status || 'in-stock'
-            });
+function _fetchProductsWithFallback() {
+    // Build ordered list of URLs to try: primary first, then each fallback base
+    const urls = [_apiBase + '/api/products'];
+    _apiFallbackBases.forEach(base => urls.push(base + '/products'));
+
+    return urls.reduce(
+        (chain, url) => chain.catch(() =>
+            fetch(url).then(res => res.ok ? res.json() : Promise.reject())
+        ),
+        Promise.reject()
+    );
+}
+
+function _populateCatalog(dbProducts) {
+    dbProducts.forEach(p => {
+        const imagePaths = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
+        if (!imagePaths.length && p.image) imagePaths.push(p.image);
+        const images = imagePaths.map(_resolveProductImage).filter(Boolean);
+        productCatalog.push({
+            id: p.code.toLowerCase(),
+            category: p.category,
+            classification: p.classification || '',
+            country: p.country || 'India',
+            name: p.name,
+            weight: p.weight || '',
+            price: p.price,
+            image: images[0] || '',
+            images,
+            status: p.status || 'in-stock'
         });
-    })
+    });
+}
+
+const productsReady = _fetchProductsWithFallback()
+    .then(_populateCatalog)
     .catch(() => {
-        // Fallback to hardcoded data if API is unavailable
         if (productCatalog.length === 0) {
             _buildFallbackCatalog();
         }

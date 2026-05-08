@@ -39,7 +39,16 @@ async function fetchJsonFrom(url, options = {}) {
             ...options,
             signal: controller.signal
         });
-        const data = await res.json().catch(() => ({}));
+        let data;
+        try {
+            data = await res.json();
+        } catch (_) {
+            if (res.ok) {
+                // 200 with non-JSON body = static/wrong server intercepting the request
+                throw new TypeError('Non-JSON response from server');
+            }
+            data = {};
+        }
         if (!res.ok) {
             throw new Error(data.message || 'Something went wrong. Please try again.');
         }
@@ -54,6 +63,15 @@ async function fetchJsonFrom(url, options = {}) {
     }
 }
 
+function _isLocalhost(url) {
+    try {
+        const { hostname } = new URL(url);
+        return hostname === 'localhost' || hostname === '127.0.0.1';
+    } catch (_) {
+        return false;
+    }
+}
+
 async function fetchJson(url, options = {}) {
     const urls = fallbackUrlsFor(url);
     let lastNetworkError = null;
@@ -65,8 +83,11 @@ async function fetchJson(url, options = {}) {
             const isNetworkError = err instanceof TypeError;
             const isTimeout = err.name === 'AbortError'
                 || err.message === 'The request is taking too long. Please check your connection and try again.';
+            // For localhost URLs always try the next fallback — the local server may be
+            // absent or may be a different process (e.g. the frontend static server).
+            const isLocalUrl = _isLocalhost(candidateUrl);
 
-            if (!isNetworkError && !isTimeout) {
+            if (!isNetworkError && !isTimeout && !isLocalUrl) {
                 throw err;
             }
 
@@ -74,13 +95,7 @@ async function fetchJson(url, options = {}) {
         }
     }
 
-    const isLocalApi = urls.some(candidate => {
-        try {
-            return new URL(candidate).hostname === 'localhost';
-        } catch (_) {
-            return false;
-        }
-    });
+    const isLocalApi = urls.some(u => _isLocalhost(u));
 
     if (isLocalApi) {
         throw new Error('Could not reach the API. Start the backend with "npm start" in the backend folder, or set MEATZAAR_BACKEND_ORIGIN to your deployed backend URL.');
