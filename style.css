@@ -827,6 +827,15 @@ body {
 
     .hero-content h2 {
         font-size: 2rem;
+        color: #000000;
+    }
+
+    .hero-content p {
+        color: #000000;
+    }
+
+    #shopNowBtn {
+        border: 2px solid #000000;
     }
 
     .hero-image {
