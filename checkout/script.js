@@ -366,16 +366,64 @@ payNowBtn.addEventListener('click', async () => {
 
     try {
         const items = cart.map(item => ({
-            productId: item.id || item.productId || '',
-            name: item.name,
-            price: parseFloat(item.price),
-            quantity: item.quantity,
-            weight: item.weight || '',
-            category: item.category || ''
-        }));
+    productId: item.id || item.productId || '',
+    name: item.name,
+    price: parseFloat(item.price),
+    quantity: item.quantity,
+    weight: item.weight || '',
+    category: item.category || ''
+}));
 
-        const deliveryInfo = { fullName: name, address, address2, landmark, city, zip, phone };
+const deliveryInfo = {
+    fullName: name,
+    address,
+    address2,
+    landmark,
+    city,
+    zip,
+    phone
+};
 
+// Calculate total
+const subtotal = cart.reduce((sum, item) => {
+    return sum + (item.price * item.quantity);
+}, 0);
+
+const tax = subtotal * 0.1;
+const delivery = 5;
+const total = subtotal + tax + delivery;
+
+// Create Razorpay order
+const response = await fetch("http://localhost:3000/api/payment/create-order", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        amount: total
+    })
+});
+
+const order = await response.json();
+
+// Razorpay options
+const options = {
+
+    key: "rzp_test_SmoL7TdBeXCVmC",
+
+    amount: order.amount,
+
+    currency: "INR",
+
+    name: "Meatzaar",
+
+    description: "Order Payment",
+
+    order_id: order.id,
+
+    handler: async function (paymentResponse) {
+
+        // Save order ONLY after payment success
         const result = await MeatzaarAuth.placeOrder(items, deliveryInfo);
 
         if (isBuyNowMode()) {
@@ -384,8 +432,40 @@ payNowBtn.addEventListener('click', async () => {
             localStorage.removeItem('cart');
         }
 
-        alert(`Order placed successfully!\n\nOrder ID: ${result.order.id}\nTotal: ₹${result.order.total.toFixed(2)}\n\nA confirmation email has been sent to your registered email.\n\nThank you for shopping at Meatzaar!`);
+        alert(
+            `Payment Successful!\n\n` +
+            `Payment ID: ${paymentResponse.razorpay_payment_id}\n\n` +
+            `Order ID: ${result.order.id}\n\n` +
+            `Thank you for shopping at Meatzaar!`
+        );
+
         window.location.href = '/index.html';
+    },
+
+    prefill: {
+        name: name,
+        contact: phone
+    },
+
+    theme: {
+        color: "#FF7300"
+    },
+
+    method: {
+        upi: true,
+        card: false,
+        netbanking: false,
+        wallet: false,
+        emi: false,
+        paylater: false
+    }
+};
+
+// Open Razorpay
+const razorpay = new Razorpay(options);
+
+razorpay.open();
+        
     } catch (err) {
         alert('Failed to place order: ' + err.message);
     } finally {
