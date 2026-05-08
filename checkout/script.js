@@ -393,23 +393,23 @@ const tax = subtotal * 0.1;
 const delivery = 5;
 const total = subtotal + tax + delivery;
 
-// Create Razorpay order
-const response = await fetch("http://localhost:3000/api/payment/create-order", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-        amount: total
+// Fetch Razorpay key and create order in parallel
+const [configRes, orderRes] = await Promise.all([
+    fetch(`${window.API_BASE}/payment/config`),
+    fetch(`${window.API_BASE}/payment/create-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: total })
     })
-});
+]);
 
-const order = await response.json();
+const { key_id } = await configRes.json();
+const order = await orderRes.json();
 
 // Razorpay options
 const options = {
 
-    key: "rzp_test_SmoL7TdBeXCVmC",
+    key: key_id,
 
     amount: order.amount,
 
