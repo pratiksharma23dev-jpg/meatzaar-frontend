@@ -75,6 +75,9 @@ function _isLocalhost(url) {
 async function fetchJson(url, options = {}) {
     const urls = fallbackUrlsFor(url);
     let lastNetworkError = null;
+    // Genuine backend API error (e.g. 401 "Invalid email or password") — distinct from
+    // network failures, timeouts, and the frontend static-server sentinel message.
+    let lastApiError = null;
 
     for (const candidateUrl of urls) {
         try {
@@ -91,8 +94,19 @@ async function fetchJson(url, options = {}) {
                 throw err;
             }
 
+            // Preserve real API errors from localhost (e.g. wrong password, validation)
+            // so they aren't swallowed when Render is sleeping and times out afterward.
+            if (!isNetworkError && !isTimeout && err.message !== 'Backend not running locally.') {
+                lastApiError = err;
+            }
+
             lastNetworkError = err;
         }
+    }
+
+    // A genuine API response was received — surface it instead of a connectivity error.
+    if (lastApiError) {
+        throw lastApiError;
     }
 
     const isLocalApi = urls.some(u => _isLocalhost(u));
@@ -239,6 +253,24 @@ const MeatzaarAuth = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, message })
+        });
+    },
+
+    // Request password reset email
+    async forgotPassword(email) {
+        return fetchJson(`${API_BASE}/auth/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+    },
+
+    // Reset password with token from email link
+    async resetPassword(token, password) {
+        return fetchJson(`${API_BASE}/auth/reset-password/${encodeURIComponent(token)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
         });
     }
 };

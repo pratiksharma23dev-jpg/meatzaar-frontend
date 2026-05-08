@@ -208,7 +208,11 @@ if (loginForm) {
             loginForm.reset();
             loginModal.classList.remove('active');
             overlay.classList.remove('active');
-            window.location.reload();
+
+            // Strip ?action=login before reloading so the modal doesn't re-open.
+            const cleanUrl = new URL(window.location.href);
+            cleanUrl.searchParams.delete('action');
+            window.location.replace(cleanUrl.toString());
         } catch (err) {
             errorEl.textContent = err.message;
             errorEl.style.display = 'block';
@@ -286,7 +290,10 @@ if (verifyForm) {
             verifyForm.reset();
             signupModal.classList.remove('active');
             overlay.classList.remove('active');
-            window.location.reload();
+
+            const cleanUrl = new URL(window.location.href);
+            cleanUrl.searchParams.delete('action');
+            window.location.replace(cleanUrl.toString());
         } catch (err) {
             errorEl.textContent = err.message;
             errorEl.style.display = 'block';

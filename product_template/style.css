@@ -87,6 +87,10 @@ body::after {
     color: var(--primary-color);
 }
 
+.logo a {
+    text-decoration: none;
+}
+
 .logo h1 {
     font-family: 'Sekuya', sans-serif;
     color: var(--primary-color);
@@ -452,7 +456,7 @@ body::after {
     }
 
     .product-image-section {
-        position: static;
+        position: relative;
     }
 
     .product-meta {
@@ -482,10 +486,22 @@ body::after {
     }
 
     .header-right {
-        position: absolute;
+        position: absolute !important;
         right: 0.75rem;
         top: 50%;
         transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+    }
+
+    /* Keep auth.js-injected controls in normal flow inside the already-positioned header-right */
+    .header-right .shared-auth-session-controls,
+    .header-right .auth-buttons.auth-session-controls {
+        position: static !important;
+        transform: none !important;
+        top: auto !important;
+        right: auto !important;
+        max-width: none !important;
     }
 
     .product-page {

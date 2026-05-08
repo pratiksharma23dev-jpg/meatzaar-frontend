@@ -53,6 +53,10 @@ body {
     justify-self: center;
 }
 
+.logo a {
+    text-decoration: none;
+}
+
 .logo h1 {
     font-family: 'Sekuya', sans-serif;
     color: var(--primary-color);
@@ -683,6 +687,27 @@ body {
         left: 0.75rem;
         top: 50%;
         transform: translateY(-50%);
+    }
+
+    /* Pull header-right out of the grid flow and pin it to the first row (logo row) */
+    .header-right {
+        position: absolute !important;
+        right: 0.75rem;
+        top: calc(0.75rem + 21px);
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        justify-self: unset;
+    }
+
+    /* Keep auth.js-injected controls in normal flow inside the already-positioned header-right */
+    .header-right .shared-auth-session-controls,
+    .header-right .auth-buttons.auth-session-controls {
+        position: static !important;
+        transform: none !important;
+        top: auto !important;
+        right: auto !important;
+        max-width: none !important;
     }
 
     .header-center {

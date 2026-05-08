@@ -128,6 +128,11 @@ function renderProductImages(product) {
     });
 }
 
+function revealLayout() {
+    const layout = document.getElementById('productLayout');
+    if (layout) layout.style.visibility = 'visible';
+}
+
 function loadProductDetails() {
     const params = new URLSearchParams(window.location.search);
     const productId = params.get('product');
@@ -136,7 +141,9 @@ function loadProductDetails() {
     if (!product) {
         productName.textContent = 'Product Not Found';
         productSummary.textContent = 'Sorry, the product you are looking for does not exist.';
+        productBadge.style.display = 'none';
         renderNoProductImage();
+        revealLayout();
         return;
     }
 
@@ -164,6 +171,7 @@ function loadProductDetails() {
 
     productOverview.textContent = `${product.name} — ${product.weight}. Origin: ${product.country}. Classified under ${product.classification} in our ${catLabel} range. Carefully selected and packed for quality.`;
     updatePurchaseAvailability(product);
+    revealLayout();
 }
 
 menuToggle.addEventListener('click', openMenu);

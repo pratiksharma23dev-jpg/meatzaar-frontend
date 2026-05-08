@@ -23,7 +23,7 @@
                 <i class="fas fa-bars"></i>
             </button>
             <div class="logo">
-                <h1>Meatzaar</h1>
+                <a href="/index.html" aria-label="Go to home page"><h1>Meatzaar</h1></a>
             </div>
         </div>
         <div class="header-right">
@@ -50,25 +50,21 @@
     <div class="overlay" id="overlay"></div>
 
     <main class="product-page">
-        <section class="product-layout">
+        <section class="product-layout" id="productLayout" style="visibility:hidden">
             <!-- Left: Image -->
             <div class="product-image-section">
-                <span class="image-badge" id="productBadge">Premium Cut</span>
-                <div class="product-image-gallery" id="productImageGallery">
-                    <div class="product-image-loading" aria-live="polite">Loading image...</div>
-                </div>
+                <span class="image-badge" id="productBadge"></span>
+                <div class="product-image-gallery" id="productImageGallery"></div>
             </div>
 
             <!-- Right: Details -->
             <div class="product-info-section">
-                <p class="product-category-label" id="productEyebrow">Chef's Choice</p>
-                <h1 class="product-title" id="productName">Farm Fresh Chicken Selection</h1>
-                <p class="product-price"><span id="productPrice">₹699</span> <span class="product-pack" id="productPack">/ 1.5 kg pack</span></p>
-                <p class="product-stock-badge in-stock" id="productStockStatus">In Stock</p>
+                <p class="product-category-label" id="productEyebrow"></p>
+                <h1 class="product-title" id="productName"></h1>
+                <p class="product-price"><span id="productPrice"></span> <span class="product-pack" id="productPack"></span></p>
+                <p class="product-stock-badge" id="productStockStatus"></p>
 
-                <p class="product-summary" id="productSummary">
-                    Tender, fresh-cut chicken prepared for everyday cooking.
-                </p>
+                <p class="product-summary" id="productSummary"></p>
 
                 <div class="purchase-box" id="purchasePanel">
                     <label for="quantity" class="quantity-label">Quantity</label>
@@ -85,45 +81,42 @@
                         <i class="fas fa-tag"></i>
                         <div>
                             <span class="meta-label">Classification</span>
-                            <span class="meta-value" id="productCategory">Poultry</span>
+                            <span class="meta-value" id="productCategory"></span>
                         </div>
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-weight-hanging"></i>
                         <div>
                             <span class="meta-label">Weight</span>
-                            <span class="meta-value" id="productWeight">1.5 kg</span>
+                            <span class="meta-value" id="productWeight"></span>
                         </div>
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-globe-asia"></i>
                         <div>
                             <span class="meta-label">Origin</span>
-                            <span class="meta-value" id="productOrigin">India</span>
+                            <span class="meta-value" id="productOrigin"></span>
                         </div>
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-box-open"></i>
                         <div>
                             <span class="meta-label">Freshness</span>
-                            <span class="meta-value" id="productFreshness">Fresh and available</span>
+                            <span class="meta-value" id="productFreshness"></span>
                         </div>
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-truck"></i>
                         <div>
                             <span class="meta-label">Estimated Delivery</span>
-                            <span class="meta-value" id="productDelivery">Tomorrow, by 9 PM</span>
+                            <span class="meta-value" id="productDelivery"></span>
                         </div>
                     </div>
                 </div>
 
                 <div class="product-description">
                     <h3>About this product</h3>
-                    <p id="productOverview">
-                        This product is cleaned, portioned, and packed to make cooking easier without
-                        compromising on flavor.
-                    </p>
+                    <p id="productOverview"></p>
                 </div>
             </div>
         </section>
