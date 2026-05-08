@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = Number(process.env.FRONTEND_PORT) || 3000;
+const PORT = Number(process.env.FRONTEND_PORT) || 3001;
 const HOST = process.env.FRONTEND_HOST || '127.0.0.1';
 const ROOT = __dirname;
 

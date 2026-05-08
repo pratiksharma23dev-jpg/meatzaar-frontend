@@ -1,5 +1,95 @@
 // ==================== MEATZAAR API CLIENT ====================
 const API_BASE = window.API_BASE || '/api';
+const API_FALLBACK_BASES = Array.isArray(window.API_FALLBACK_BASES) ? window.API_FALLBACK_BASES : [];
+const REQUEST_TIMEOUT_MS = 25000;
+
+function normalizeApiUrl(url) {
+    return new URL(url, window.location.origin).toString();
+}
+
+function fallbackUrlsFor(url) {
+    const absoluteUrl = normalizeApiUrl(url);
+    const primaryApiBase = normalizeApiUrl(API_BASE).replace(/\/+$/, '');
+    const parsedUrl = new URL(absoluteUrl);
+
+    if (!absoluteUrl.startsWith(`${primaryApiBase}/`)) {
+        return [absoluteUrl];
+    }
+
+    const apiPath = absoluteUrl.slice(primaryApiBase.length);
+    const urls = [absoluteUrl];
+
+    API_FALLBACK_BASES.forEach(base => {
+        const normalizedBase = normalizeApiUrl(base).replace(/\/+$/, '');
+        urls.push(`${normalizedBase}${apiPath}`);
+    });
+
+    return [...new Set(urls)].filter(candidate => {
+        const candidateUrl = new URL(candidate);
+        return candidateUrl.protocol === 'http:' || candidateUrl.protocol === 'https:';
+    });
+}
+
+async function fetchJsonFrom(url, options = {}) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), options.timeout || REQUEST_TIMEOUT_MS);
+
+    try {
+        const res = await fetch(url, {
+            ...options,
+            signal: controller.signal
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            throw new Error(data.message || 'Something went wrong. Please try again.');
+        }
+        return data;
+    } catch (err) {
+        if (err.name === 'AbortError') {
+            throw new Error('The request is taking too long. Please check your connection and try again.');
+        }
+        throw err;
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+async function fetchJson(url, options = {}) {
+    const urls = fallbackUrlsFor(url);
+    let lastNetworkError = null;
+
+    for (const candidateUrl of urls) {
+        try {
+            return await fetchJsonFrom(candidateUrl, options);
+        } catch (err) {
+            const isNetworkError = err instanceof TypeError;
+            const isTimeout = err.name === 'AbortError'
+                || err.message === 'The request is taking too long. Please check your connection and try again.';
+
+            if (!isNetworkError && !isTimeout) {
+                throw err;
+            }
+
+            lastNetworkError = err;
+        }
+    }
+
+    const isLocalApi = urls.some(candidate => {
+        try {
+            return new URL(candidate).hostname === 'localhost';
+        } catch (_) {
+            return false;
+        }
+    });
+
+    if (isLocalApi) {
+        throw new Error('Could not reach the API. Start the backend with "npm start" in the backend folder, or set MEATZAAR_BACKEND_ORIGIN to your deployed backend URL.');
+    }
+
+    throw new Error(lastNetworkError && lastNetworkError.message
+        ? lastNetworkError.message
+        : 'Could not reach the API. Please check your connection and try again.');
+}
 
 const MeatzaarAuth = {
     // Get stored token
@@ -33,55 +123,46 @@ const MeatzaarAuth = {
     // Signup
     // Send verification code to email
     async sendVerification(name, email, password, confirmPassword) {
-        const res = await fetch(`${API_BASE}/auth/send-verification`, {
+        return fetchJson(`${API_BASE}/auth/send-verification`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, password, confirmPassword })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
-        return data;
     },
 
     // Signup with verification code
     async signup(email, verificationCode) {
-        const res = await fetch(`${API_BASE}/auth/signup`, {
+        const data = await fetchJson(`${API_BASE}/auth/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, verificationCode })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
         this._saveAuth(data);
         return data;
     },
 
     // Login
     async login(email, password) {
-        const res = await fetch(`${API_BASE}/auth/login`, {
+        const data = await fetchJson(`${API_BASE}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
         this._saveAuth(data);
         return data;
     },
 
     // Get current user profile
     async getProfile() {
-        const res = await fetch(`${API_BASE}/auth/me`, {
+        const data = await fetchJson(`${API_BASE}/auth/me`, {
             headers: { 'Authorization': `Bearer ${this.getToken()}` }
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
         return data.user;
     },
 
     // Update profile
     async updateProfile(updates) {
-        const res = await fetch(`${API_BASE}/auth/profile`, {
+        const data = await fetchJson(`${API_BASE}/auth/profile`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -89,15 +170,13 @@ const MeatzaarAuth = {
             },
             body: JSON.stringify(updates)
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
         localStorage.setItem('meatzaar_user', JSON.stringify(data.user));
         return data;
     },
 
     // Place order
     async placeOrder(items, deliveryInfo) {
-        const res = await fetch(`${API_BASE}/orders`, {
+        return fetchJson(`${API_BASE}/orders`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -105,14 +184,11 @@ const MeatzaarAuth = {
             },
             body: JSON.stringify({ items, deliveryInfo })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
-        return data;
     },
 
     // Send phone OTP for checkout verification
     async sendPhoneOtp(phone) {
-        const res = await fetch(`${API_BASE}/orders/phone/send-otp`, {
+        return fetchJson(`${API_BASE}/orders/phone/send-otp`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -120,14 +196,11 @@ const MeatzaarAuth = {
             },
             body: JSON.stringify({ phone })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
-        return data;
     },
 
     // Verify phone OTP for checkout verification
     async verifyPhoneOtp(phone, otp) {
-        const res = await fetch(`${API_BASE}/orders/phone/verify-otp`, {
+        return fetchJson(`${API_BASE}/orders/phone/verify-otp`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -135,31 +208,23 @@ const MeatzaarAuth = {
             },
             body: JSON.stringify({ phone, otp })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
-        return data;
     },
 
     // Get all orders
     async getOrders() {
-        const res = await fetch(`${API_BASE}/orders`, {
+        const data = await fetchJson(`${API_BASE}/orders`, {
             headers: { 'Authorization': `Bearer ${this.getToken()}` }
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
         return data.orders;
     },
 
     // Contact form
     async sendContact(name, email, message) {
-        const res = await fetch(`${API_BASE}/contact`, {
+        return fetchJson(`${API_BASE}/contact`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, message })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
-        return data;
     }
 };
 
