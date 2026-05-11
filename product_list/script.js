@@ -246,11 +246,11 @@ function renderProducts() {
                     </div>
                     <div class="product-actions">
                         <div class="qty-control">
-                            <button class="qty-btn" onclick="changeQty('${product.id}', -1)" ${isDisabled ? 'disabled' : ''}>&minus;</button>
+                            <button class="qty-btn" data-action="qty-dec" data-id="${product.id}" ${isDisabled ? 'disabled' : ''}>&minus;</button>
                             <span class="qty-display" id="qty-${product.id}">${qty}</span>
-                            <button class="qty-btn" onclick="changeQty('${product.id}', 1)" ${isDisabled ? 'disabled' : ''}>+</button>
+                            <button class="qty-btn" data-action="qty-inc" data-id="${product.id}" ${isDisabled ? 'disabled' : ''}>+</button>
                         </div>
-                        <button class="btn-add" onclick="addToCart('${product.id}')" ${isDisabled ? 'disabled style="opacity:0.4;cursor:not-allowed"' : ''}>Add</button>
+                        <button class="btn-add" data-action="add-to-cart" data-id="${product.id}" ${isDisabled ? 'disabled style="opacity:0.4;cursor:not-allowed"' : ''}>Add</button>
                     </div>
                 </div>
             </div>
@@ -290,27 +290,27 @@ function renderPagination(totalPages) {
     let html = '';
 
     // Prev button
-    html += `<button class="page-btn prev-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">&laquo; Prev</button>`;
+    html += `<button class="page-btn prev-btn" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}">&laquo; Prev</button>`;
 
     // First page + ellipsis
     if (startPage > 1) {
-        html += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
+        html += `<button class="page-btn" data-page="1">1</button>`;
         if (startPage > 2) html += `<span class="page-ellipsis">&hellip;</span>`;
     }
 
     // Page numbers
     for (let i = startPage; i <= endPage; i++) {
-        html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+        html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
     }
 
     // Last page + ellipsis
     if (endPage < totalPages) {
         if (endPage < totalPages - 1) html += `<span class="page-ellipsis">&hellip;</span>`;
-        html += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+        html += `<button class="page-btn" data-page="${totalPages}">${totalPages}</button>`;
     }
 
     // Next button
-    html += `<button class="page-btn next-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">Next &raquo;</button>`;
+    html += `<button class="page-btn next-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}">Next &raquo;</button>`;
 
     paginationContainer.innerHTML = html;
 }
@@ -505,6 +505,23 @@ function updateSlider() {
 priceMinSlider.addEventListener('input', updateSlider);
 priceMaxSlider.addEventListener('input', updateSlider);
 updateSlider();
+
+// ==================== EVENT DELEGATION ====================
+productsGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn || btn.disabled) return;
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+    if (action === 'qty-dec') changeQty(id, -1);
+    else if (action === 'qty-inc') changeQty(id, 1);
+    else if (action === 'add-to-cart') addToCart(id);
+});
+
+paginationContainer.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-page]');
+    if (!btn || btn.disabled) return;
+    goToPage(parseInt(btn.dataset.page, 10));
+});
 
 // ==================== INIT ====================
 if (typeof productsReady !== 'undefined') {

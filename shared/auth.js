@@ -10,7 +10,6 @@ function normalizeApiUrl(url) {
 function fallbackUrlsFor(url) {
     const absoluteUrl = normalizeApiUrl(url);
     const primaryApiBase = normalizeApiUrl(API_BASE).replace(/\/+$/, '');
-    const parsedUrl = new URL(absoluteUrl);
 
     if (!absoluteUrl.startsWith(`${primaryApiBase}/`)) {
         return [absoluteUrl];
@@ -36,6 +35,10 @@ async function fetchJsonFrom(url, options = {}) {
 
     try {
         const res = await fetch(url, {
+            // Always include credentials so the httpOnly auth cookie is sent.
+            // This replaces the previous Authorization: Bearer <token> approach
+            // and ensures the token is never accessible to JavaScript.
+            credentials: 'include',
             ...options,
             signal: controller.signal
         });
@@ -43,10 +46,7 @@ async function fetchJsonFrom(url, options = {}) {
         try {
             data = await res.json();
         } catch (_) {
-            if (res.ok) {
-                // 200 with non-JSON body = static/wrong server intercepting the request
-                throw new TypeError('Non-JSON response from server');
-            }
+            if (res.ok) throw new TypeError('Non-JSON response from server');
             data = {};
         }
         if (!res.ok) {
@@ -75,8 +75,6 @@ function _isLocalhost(url) {
 async function fetchJson(url, options = {}) {
     const urls = fallbackUrlsFor(url);
     let lastNetworkError = null;
-    // Genuine backend API error (e.g. 401 "Invalid email or password") — distinct from
-    // network failures, timeouts, and the frontend static-server sentinel message.
     let lastApiError = null;
 
     for (const candidateUrl of urls) {
@@ -86,16 +84,12 @@ async function fetchJson(url, options = {}) {
             const isNetworkError = err instanceof TypeError;
             const isTimeout = err.name === 'AbortError'
                 || err.message === 'The request is taking too long. Please check your connection and try again.';
-            // For localhost URLs always try the next fallback — the local server may be
-            // absent or may be a different process (e.g. the frontend static server).
             const isLocalUrl = _isLocalhost(candidateUrl);
 
             if (!isNetworkError && !isTimeout && !isLocalUrl) {
                 throw err;
             }
 
-            // Preserve real API errors from localhost (e.g. wrong password, validation)
-            // so they aren't swallowed when Render is sleeping and times out afterward.
             if (!isNetworkError && !isTimeout && err.message !== 'Backend not running locally.') {
                 lastApiError = err;
             }
@@ -104,13 +98,9 @@ async function fetchJson(url, options = {}) {
         }
     }
 
-    // A genuine API response was received — surface it instead of a connectivity error.
-    if (lastApiError) {
-        throw lastApiError;
-    }
+    if (lastApiError) throw lastApiError;
 
     const isLocalApi = urls.some(u => _isLocalhost(u));
-
     if (isLocalApi) {
         throw new Error('Could not reach the API. Start the backend with "npm start" in the backend folder, or set MEATZAAR_BACKEND_ORIGIN to your deployed backend URL.');
     }
@@ -120,37 +110,40 @@ async function fetchJson(url, options = {}) {
         : 'Could not reach the API. Please check your connection and try again.');
 }
 
+// ==================== AUTH CLIENT ====================
 const MeatzaarAuth = {
-    // Get stored token
-    getToken() {
-        return localStorage.getItem('meatzaar_token');
-    },
-
-    // Get stored user
+    // Returns the stored user object (non-sensitive: name, email, id only).
+    // Used for UI state only — actual authentication is the httpOnly cookie.
     getUser() {
-        const user = localStorage.getItem('meatzaar_user');
-        return user ? JSON.parse(user) : null;
+        try {
+            const user = localStorage.getItem('meatzaar_user');
+            return user ? JSON.parse(user) : null;
+        } catch {
+            return null;
+        }
     },
 
-    // Check if logged in
+    // UI hint: is there a stored user profile? The httpOnly cookie is the real auth gate.
     isLoggedIn() {
-        return !!this.getToken();
+        return !!this.getUser();
     },
 
-    // Save auth data
-    _saveAuth(data) {
-        localStorage.setItem('meatzaar_token', data.token);
-        localStorage.setItem('meatzaar_user', JSON.stringify(data.user));
+    // Store non-sensitive user info for UI display.
+    _saveUser(user) {
+        localStorage.setItem('meatzaar_user', JSON.stringify(user));
     },
 
-    // Clear auth data
+    // Clear local UI state and ask the backend to expire the httpOnly cookie.
     logout() {
-        localStorage.removeItem('meatzaar_token');
         localStorage.removeItem('meatzaar_user');
+        // Fire-and-forget — clears the Set-Cookie on the server side.
+        fetch(`${API_BASE}/auth/logout`, {
+            method: 'POST',
+            credentials: 'include'
+        }).catch(() => {});
     },
 
-    // Signup
-    // Send verification code to email
+    // Send email verification code (pre-signup step).
     async sendVerification(name, email, password, confirmPassword) {
         return fetchJson(`${API_BASE}/auth/send-verification`, {
             method: 'POST',
@@ -159,95 +152,101 @@ const MeatzaarAuth = {
         });
     },
 
-    // Signup with verification code
+    // Complete signup with the emailed verification code.
+    // The backend sets an httpOnly cookie; we only store non-sensitive user data locally.
     async signup(email, verificationCode) {
         const data = await fetchJson(`${API_BASE}/auth/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, verificationCode })
         });
-        this._saveAuth(data);
+        this._saveUser(data.user);
         return data;
     },
 
-    // Login
+    // Login — backend sets httpOnly cookie, we store display data only.
     async login(email, password) {
         const data = await fetchJson(`${API_BASE}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
-        this._saveAuth(data);
+        this._saveUser(data.user);
         return data;
     },
 
-    // Get current user profile
+    // Fetch the current user's profile from the backend (cookie auth, no token needed).
     async getProfile() {
-        const data = await fetchJson(`${API_BASE}/auth/me`, {
-            headers: { 'Authorization': `Bearer ${this.getToken()}` }
-        });
+        const data = await fetchJson(`${API_BASE}/auth/me`);
         return data.user;
     },
 
-    // Update profile
+    // Update profile fields — cookie handles auth.
     async updateProfile(updates) {
         const data = await fetchJson(`${API_BASE}/auth/profile`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.getToken()}`
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updates)
         });
-        localStorage.setItem('meatzaar_user', JSON.stringify(data.user));
+        this._saveUser(data.user);
         return data;
     },
 
-    // Place order
-    async placeOrder(items, deliveryInfo) {
-        return fetchJson(`${API_BASE}/orders`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.getToken()}`
-            },
-            body: JSON.stringify({ items, deliveryInfo })
-        });
-    },
-
-    // Send phone OTP for checkout verification
+    // Send phone OTP for checkout verification.
     async sendPhoneOtp(phone) {
         return fetchJson(`${API_BASE}/orders/phone/send-otp`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.getToken()}`
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ phone })
         });
     },
 
-    // Verify phone OTP for checkout verification
+    // Verify phone OTP.
     async verifyPhoneOtp(phone, otp) {
         return fetchJson(`${API_BASE}/orders/phone/verify-otp`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.getToken()}`
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ phone, otp })
         });
     },
 
-    // Get all orders
-    async getOrders() {
-        const data = await fetchJson(`${API_BASE}/orders`, {
-            headers: { 'Authorization': `Bearer ${this.getToken()}` }
+    // Step 1 of checkout: create Razorpay order on the backend.
+    // Backend fetches product prices from DB — client prices are ignored.
+    async createPaymentOrder(items) {
+        return fetchJson(`${API_BASE}/payment/create-order`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items })
         });
+    },
+
+    // Step 2 of checkout: verify Razorpay HMAC signature on the backend.
+    // Must be called before placeOrder — creates the VerifiedPayment record.
+    async verifyPayment(razorpay_payment_id, razorpay_order_id, razorpay_signature) {
+        return fetchJson(`${API_BASE}/payment/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ razorpay_payment_id, razorpay_order_id, razorpay_signature })
+        });
+    },
+
+    // Step 3 of checkout: place the order after payment is verified.
+    // razorpay_order_id must match a VerifiedPayment record on the backend.
+    async placeOrder(items, deliveryInfo, razorpay_order_id) {
+        return fetchJson(`${API_BASE}/orders`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items, deliveryInfo, razorpay_order_id })
+        });
+    },
+
+    // Fetch all orders for the current user.
+    async getOrders() {
+        const data = await fetchJson(`${API_BASE}/orders`);
         return data.orders;
     },
 
-    // Contact form
+    // Submit contact form (no auth required).
     async sendContact(name, email, message) {
         return fetchJson(`${API_BASE}/contact`, {
             method: 'POST',
@@ -256,7 +255,7 @@ const MeatzaarAuth = {
         });
     },
 
-    // Request password reset email
+    // Request password reset email.
     async forgotPassword(email) {
         return fetchJson(`${API_BASE}/auth/forgot-password`, {
             method: 'POST',
@@ -265,7 +264,7 @@ const MeatzaarAuth = {
         });
     },
 
-    // Reset password with token from email link
+    // Reset password with the token from the reset link.
     async resetPassword(token, password) {
         return fetchJson(`${API_BASE}/auth/reset-password/${encodeURIComponent(token)}`, {
             method: 'POST',
@@ -316,7 +315,6 @@ function updateAuthUI() {
         </a>
     `;
 
-    // Inject shared nav styles (always needed for cart icon)
     const style = document.createElement('style');
     style.textContent = `
         :root {
@@ -368,9 +366,7 @@ function updateAuthUI() {
             object-fit: cover;
             transition: border-color 0.3s ease;
         }
-        .user-avatar:hover {
-            border-color: #fff;
-        }
+        .user-avatar:hover { border-color: #fff; }
         .nav-cart-link {
             position: relative;
             display: flex;
@@ -381,9 +377,7 @@ function updateAuthUI() {
             margin-left: 0.75rem;
             transition: color 0.3s ease;
         }
-        .nav-cart-link:hover {
-            color: #FF7300;
-        }
+        .nav-cart-link:hover { color: #FF7300; }
         .cart-badge {
             position: absolute;
             top: -8px;
@@ -400,12 +394,10 @@ function updateAuthUI() {
             justify-content: center;
             line-height: 1;
         }
-        .cart-badge.hidden {
-            display: none;
-        }
+        .cart-badge.hidden { display: none; }
         .side-nav .side-auth-divider {
             border: none;
-            border-top: 1px solid rgba(255, 255, 255, 0.18);
+            border-top: 1px solid rgba(255,255,255,0.18);
             width: 100%;
             margin: 0.75rem 0 0.25rem;
         }
@@ -432,127 +424,62 @@ function updateAuthUI() {
             border: 2px solid #ffffff;
             color: #ffffff;
         }
-        .side-nav #loginBtnMobile:hover {
-            background: #ffffff;
-            color: #1a1a1a;
-        }
+        .side-nav #loginBtnMobile:hover { background: #ffffff; color: #1a1a1a; }
         .side-nav #signupBtnMobile {
             background: #FF7300;
             border: 2px solid #FF7300;
             color: #ffffff;
         }
-        .side-nav #signupBtnMobile:hover {
-            background: #ffffff;
-            border-color: #ffffff;
-            color: #1a1a1a;
-        }
+        .side-nav #signupBtnMobile:hover { background: #ffffff; border-color: #ffffff; color: #1a1a1a; }
         .side-logout-btn {
             background: transparent;
             border: 2px solid #e74c3c;
             color: #e74c3c;
         }
-        .side-logout-btn:hover {
-            background-color: #e74c3c;
-            color: #fff;
-        }
-        .side-nav #loginBtnMobile + #signupBtnMobile {
-            margin-top: 0.65rem;
-        }
-        .side-nav .btn-full {
-            width: 100%;
-        }
+        .side-logout-btn:hover { background-color: #e74c3c; color: #fff; }
+        .side-nav #loginBtnMobile + #signupBtnMobile { margin-top: 0.65rem; }
+        .side-nav .btn-full { width: 100%; }
         @media (min-width: 769px) {
-            .auth-session-host.auth-session-search-host {
-                gap: 1.5rem;
-            }
-            .auth-session-host.auth-session-search-host .search-wrapper {
-                margin-left: 0;
-                margin-right: 0;
-            }
-            .auth-session-host.auth-session-search-host .auth-buttons.auth-session-controls {
-                width: 210px;
-                min-width: 210px;
-                margin-left: 0;
-            }
+            .auth-session-host.auth-session-search-host { gap: 1.5rem; }
+            .auth-session-host.auth-session-search-host .search-wrapper { margin-left: 0; margin-right: 0; }
+            .auth-session-host.auth-session-search-host .auth-buttons.auth-session-controls { width: 210px; min-width: 210px; margin-left: 0; }
         }
         @media (max-width: 768px) {
-            :root {
-                --session-icon-gap: 0.45rem;
-                --session-avatar-size: 30px;
-                --session-cart-size: 1.05rem;
-                --session-badge-size: 15px;
-                --session-badge-font: 0.55rem;
-            }
-            .logo h1 {
-                font-size: 1.4rem !important;
-            }
-            .auth-session-host {
-                position: relative;
-            }
-            .auth-buttons.auth-session-controls,
-            .shared-auth-session-controls {
-                display: flex !important;
-                align-items: center;
-                gap: var(--session-icon-gap);
-                position: absolute;
-                top: 50%;
-                right: 0.55rem;
-                transform: translateY(-50%);
-                z-index: 105;
-                flex-wrap: nowrap;
-                max-width: 72px;
+            :root { --session-icon-gap: 0.45rem; --session-avatar-size: 30px; --session-cart-size: 1.05rem; --session-badge-size: 15px; --session-badge-font: 0.55rem; }
+            .logo h1 { font-size: 1.4rem !important; }
+            .auth-session-host { position: relative; }
+            .auth-buttons.auth-session-controls, .shared-auth-session-controls {
+                display: flex !important; align-items: center; gap: var(--session-icon-gap);
+                position: absolute; top: 50%; right: 0.55rem; transform: translateY(-50%);
+                z-index: 105; flex-wrap: nowrap; max-width: 72px;
             }
             .auth-session-host.auth-session-search-host > .auth-buttons.auth-session-controls,
-            .auth-session-host.auth-session-search-host > .shared-auth-session-controls {
-                top: 0.35rem;
-                transform: none;
-            }
+            .auth-session-host.auth-session-search-host > .shared-auth-session-controls { top: 0.35rem; transform: none; }
             header.auth-session-host.auth-session-search-host > .auth-buttons.auth-session-controls,
-            header.auth-session-host.auth-session-search-host > .shared-auth-session-controls {
-                top: calc(0.75rem + 21px);
-                transform: translateY(-50%);
-            }
+            header.auth-session-host.auth-session-search-host > .shared-auth-session-controls { top: calc(0.75rem + 21px); transform: translateY(-50%); }
             .auth-buttons.auth-session-controls .user-greeting,
-            .shared-auth-session-controls .user-greeting {
-                display: none;
-            }
+            .shared-auth-session-controls .user-greeting { display: none; }
             .auth-buttons.auth-session-controls .user-avatar-link,
-            .shared-auth-session-controls .user-avatar-link {
-                gap: 0;
-            }
+            .shared-auth-session-controls .user-avatar-link { gap: 0; }
             .auth-buttons.auth-session-controls .cart-badge,
-            .shared-auth-session-controls .cart-badge {
-                top: -6px;
-                right: -8px;
-            }
+            .shared-auth-session-controls .cart-badge { top: -6px; right: -8px; }
         }
         @media (max-width: 380px) {
-            :root {
-                --session-icon-gap: 0.35rem;
-                --session-avatar-size: 28px;
-                --session-cart-size: 1rem;
-            }
-            .auth-buttons.auth-session-controls,
-            .shared-auth-session-controls {
-                right: 0.45rem;
-                max-width: 64px;
-            }
+            :root { --session-icon-gap: 0.35rem; --session-avatar-size: 28px; --session-cart-size: 1rem; }
+            .auth-buttons.auth-session-controls, .shared-auth-session-controls { right: 0.45rem; max-width: 64px; }
         }
     `;
     document.head.appendChild(style);
 
-    // Cart path & badge (always needed)
     const cartLink = document.querySelector('.side-nav a[href*="cart"]');
     const cartPath = cartLink ? cartLink.getAttribute('href') : '../cart/cart.html';
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const cartCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
     const cartBadgeHTML = `<span class="cart-badge${cartCount === 0 ? ' hidden' : ''}" id="navCartBadge">${cartCount}</span>`;
 
-    // Remove any existing static cart icons to avoid duplicates
     const existingCartIcons = document.querySelectorAll('header .cart-icon');
     existingCartIcons.forEach(el => el.remove());
 
-    // Find the header container to append to
     const container = document.querySelector('.header-container')
         || document.querySelector('.header-right')
         || document.querySelector('header');
@@ -562,7 +489,6 @@ function updateAuthUI() {
         const profilePath = profileLink ? profileLink.getAttribute('href') : '../profile/profile.html';
         const avatarUrl = `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(user.name)}`;
         const firstName = user.name.split(' ')[0];
-
         const authButtons = document.querySelector('.auth-buttons');
 
         if (authButtons) {
@@ -585,7 +511,6 @@ function updateAuthUI() {
             container.appendChild(controls);
         }
 
-        // --- Side menu: replace login/signup with logout ---
         if (sideNav) {
             const loginBtnMobile = document.getElementById('loginBtnMobile');
             const signupBtnMobile = document.getElementById('signupBtnMobile');
@@ -621,9 +546,7 @@ function updateAuthUI() {
         } else {
             loginBtnMobile.textContent = 'Login';
             if (!hasLocalAuthModals) {
-                loginBtnMobile.onclick = () => {
-                    window.location.href = '/index.html?action=login';
-                };
+                loginBtnMobile.onclick = () => { window.location.href = '/index.html?action=login'; };
             }
         }
 
@@ -634,9 +557,7 @@ function updateAuthUI() {
         } else {
             signupBtnMobile.textContent = 'Sign Up';
             if (!hasLocalAuthModals) {
-                signupBtnMobile.onclick = () => {
-                    window.location.href = '/index.html?action=signup';
-                };
+                signupBtnMobile.onclick = () => { window.location.href = '/index.html?action=signup'; };
             }
         }
     }
@@ -644,10 +565,8 @@ function updateAuthUI() {
     document.body.classList.add('auth-ui-ready');
 }
 
-// Run on page load
 document.addEventListener('DOMContentLoaded', updateAuthUI);
 
-// Global function to update the nav cart badge in real-time
 function updateNavCartBadge() {
     const badge = document.getElementById('navCartBadge');
     if (!badge) return;

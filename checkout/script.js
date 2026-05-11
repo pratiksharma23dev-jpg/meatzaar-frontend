@@ -362,112 +362,103 @@ payNowBtn.addEventListener('click', async () => {
     }
 
     payNowBtn.disabled = true;
-    payNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Placing Order...';
+    payNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initiating Payment...';
 
     try {
-        const items = cart.map(item => ({
-    productId: item.id || item.productId || '',
-    name: item.name,
-    price: parseFloat(item.price),
-    quantity: item.quantity,
-    weight: item.weight || '',
-    category: item.category || ''
-}));
+        // Build the item list with product codes and quantities.
+        // Prices are NOT sent — the backend fetches them from the database.
+        const orderItems = cart.map(item => ({
+            productId: item.id || item.productId || '',
+            quantity: item.quantity,
+            // weight and category are display metadata, not pricing inputs.
+            weight: item.weight || '',
+            category: item.category || ''
+        }));
 
-const deliveryInfo = {
-    fullName: name,
-    address,
-    address2,
-    landmark,
-    city,
-    zip,
-    phone
-};
+        const deliveryInfo = {
+            fullName: name,
+            address,
+            address2,
+            landmark,
+            city,
+            zip,
+            phone
+        };
 
-// Calculate total
-const subtotal = cart.reduce((sum, item) => {
-    return sum + (item.price * item.quantity);
-}, 0);
+        // Step 1: Create the Razorpay order on the backend.
+        // The backend fetches DB prices and returns the authoritative total.
+        const [configRes, paymentOrderData] = await Promise.all([
+            fetch(`${window.API_BASE}/payment/config`, { credentials: 'include' }),
+            MeatzaarAuth.createPaymentOrder(orderItems)
+        ]);
 
-const tax = subtotal * 0.1;
-const delivery = 5;
-const total = subtotal + tax + delivery;
+        const { key_id } = await configRes.json();
+        const { order: rzpOrder } = paymentOrderData;
 
-// Fetch Razorpay key and create order in parallel
-const [configRes, orderRes] = await Promise.all([
-    fetch(`${window.API_BASE}/payment/config`),
-    fetch(`${window.API_BASE}/payment/create-order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: total })
-    })
-]);
+        // Razorpay options — amount comes from the server-calculated order, not the cart.
+        const options = {
+            key: key_id,
+            amount: rzpOrder.amount,   // paise, set by backend
+            currency: 'INR',
+            name: 'Meatzaar',
+            description: 'Order Payment',
+            order_id: rzpOrder.id,
 
-const { key_id } = await configRes.json();
-const order = await orderRes.json();
+            handler: async function (paymentResponse) {
+                try {
+                    // Step 2: Verify the Razorpay HMAC signature on the backend.
+                    // This proves the payment is genuine — not fabricated by the client.
+                    // The backend writes a VerifiedPayment record on success.
+                    await MeatzaarAuth.verifyPayment(
+                        paymentResponse.razorpay_payment_id,
+                        paymentResponse.razorpay_order_id,
+                        paymentResponse.razorpay_signature
+                    );
 
-// Razorpay options
-const options = {
+                    // Step 3: Place the order — backend checks VerifiedPayment,
+                    // re-fetches prices from DB, validates amount, then saves the Order.
+                    const result = await MeatzaarAuth.placeOrder(
+                        orderItems,
+                        deliveryInfo,
+                        rzpOrder.id  // razorpay_order_id links to the VerifiedPayment record
+                    );
 
-    key: key_id,
+                    if (isBuyNowMode()) {
+                        localStorage.removeItem('buyNow_item');
+                    } else {
+                        localStorage.removeItem('cart');
+                    }
 
-    amount: order.amount,
+                    alert(
+                        `Payment Successful!\n\n` +
+                        `Payment ID: ${paymentResponse.razorpay_payment_id}\n\n` +
+                        `Order ID: ${result.order.id}\n\n` +
+                        `Thank you for shopping at Meatzaar!`
+                    );
 
-    currency: "INR",
+                    window.location.href = '/index.html';
+                } catch (err) {
+                    // Payment went through but order creation failed.
+                    // Show a clear message so the customer can contact support with the payment ID.
+                    alert(
+                        `Your payment was received (ID: ${paymentResponse.razorpay_payment_id}) ` +
+                        `but the order could not be saved.\n\n` +
+                        `Please contact support with your Payment ID. You will not be charged twice.`
+                    );
+                    console.error('Order creation after payment failed:', err);
+                }
+            },
 
-    name: "Meatzaar",
+            prefill: { name, contact: phone },
+            theme: { color: '#FF7300' },
+            method: { upi: true, card: false, netbanking: false, wallet: false, emi: false, paylater: false }
+        };
 
-    description: "Order Payment",
+        const razorpay = new Razorpay(options);
+        razorpay.open();
 
-    order_id: order.id,
-
-    handler: async function (paymentResponse) {
-
-        // Save order ONLY after payment success
-        const result = await MeatzaarAuth.placeOrder(items, deliveryInfo);
-
-        if (isBuyNowMode()) {
-            localStorage.removeItem('buyNow_item');
-        } else {
-            localStorage.removeItem('cart');
-        }
-
-        alert(
-            `Payment Successful!\n\n` +
-            `Payment ID: ${paymentResponse.razorpay_payment_id}\n\n` +
-            `Order ID: ${result.order.id}\n\n` +
-            `Thank you for shopping at Meatzaar!`
-        );
-
-        window.location.href = '/index.html';
-    },
-
-    prefill: {
-        name: name,
-        contact: phone
-    },
-
-    theme: {
-        color: "#FF7300"
-    },
-
-    method: {
-        upi: true,
-        card: false,
-        netbanking: false,
-        wallet: false,
-        emi: false,
-        paylater: false
-    }
-};
-
-// Open Razorpay
-const razorpay = new Razorpay(options);
-
-razorpay.open();
-        
     } catch (err) {
-        alert('Failed to place order: ' + err.message);
+        alert('Failed to initiate payment: ' + err.message);
     } finally {
         payNowBtn.disabled = false;
         payNowBtn.innerHTML = '<i class="fas fa-lock"></i> Pay Now';

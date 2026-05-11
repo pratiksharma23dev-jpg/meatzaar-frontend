@@ -1,7 +1,9 @@
 const API_BASE = window.ADMIN_API_BASE || '/api/admin';
 
 // ==================== STATE ====================
-let adminPassword = '';
+// adminToken is the short-lived JWT issued by the backend on login.
+// The raw admin password is discarded after the login response and never re-sent.
+let adminToken = '';
 let allProducts = [];
 let allOrders = [];
 let editingProductCode = '';
@@ -12,10 +14,11 @@ const $$ = (sel) => document.querySelectorAll(sel);
 
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', () => {
-    const saved = sessionStorage.getItem('adminPassword');
+    // Restore admin session token from sessionStorage on page reload.
+    const saved = sessionStorage.getItem('adminToken');
     if (saved) {
-        adminPassword = saved;
-        verifyLogin(saved);
+        adminToken = saved;
+        verifyStoredToken(saved);
     }
 
     // Login form
@@ -34,8 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Logout
     $('#logoutBtn').addEventListener('click', () => {
-        sessionStorage.removeItem('adminPassword');
-        adminPassword = '';
+        sessionStorage.removeItem('adminToken');
+        adminToken = '';
         $('#dashboard').classList.add('hidden');
         $('#loginScreen').classList.remove('hidden');
         $('#adminPassword').value = '';
@@ -99,9 +102,10 @@ async function verifyLogin(pw) {
             body: JSON.stringify({ password: pw })
         });
         const data = await res.json();
-        if (res.ok && data.success) {
-            adminPassword = pw;
-            sessionStorage.setItem('adminPassword', pw);
+        if (res.ok && data.success && data.adminToken) {
+            // Store the signed JWT — not the raw password.
+            adminToken = data.adminToken;
+            sessionStorage.setItem('adminToken', adminToken);
             $('#loginScreen').classList.add('hidden');
             $('#dashboard').classList.remove('hidden');
             $('#loginError').textContent = '';
@@ -109,15 +113,40 @@ async function verifyLogin(pw) {
             loadOrders();
         } else {
             $('#loginError').textContent = data.message || 'Invalid password.';
-            sessionStorage.removeItem('adminPassword');
+            sessionStorage.removeItem('adminToken');
         }
     } catch {
         $('#loginError').textContent = 'Server unreachable. Is the backend running?';
     }
 }
 
+// Verify a stored token is still valid by hitting any protected admin endpoint.
+async function verifyStoredToken(token) {
+    try {
+        const res = await fetch(`${API_BASE}/products`, {
+            headers: { 'X-Admin-Token': token }
+        });
+        if (res.ok) {
+            $('#loginScreen').classList.add('hidden');
+            $('#dashboard').classList.remove('hidden');
+            loadProducts();
+            loadOrders();
+        } else {
+            // Token expired or invalid — force re-login.
+            sessionStorage.removeItem('adminToken');
+            adminToken = '';
+        }
+    } catch {
+        // Network issue — keep login screen visible.
+        sessionStorage.removeItem('adminToken');
+        adminToken = '';
+    }
+}
+
+// Sends the signed JWT in X-Admin-Token header.
+// The raw admin password never travels after the initial login handshake.
 function authHeaders() {
-    return { 'X-Admin-Password': adminPassword };
+    return { 'X-Admin-Token': adminToken };
 }
 
 // ==================== PRODUCTS ====================

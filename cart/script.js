@@ -78,11 +78,11 @@ function renderCart() {
                 <div class="item-name">${item.name}</div>
                 <div class="item-price">₹${parseFloat(item.price).toFixed(2)} per unit</div>
                 <div class="quantity-control">
-                    <button class="quantity-btn" onclick="decreaseQuantity(${index})">
+                    <button class="quantity-btn" data-action="decrease" data-index="${index}">
                         <i class="fas fa-minus"></i>
                     </button>
                     <span class="quantity-display">${item.quantity}</span>
-                    <button class="quantity-btn" onclick="increaseQuantity(${index})">
+                    <button class="quantity-btn" data-action="increase" data-index="${index}">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
@@ -90,7 +90,7 @@ function renderCart() {
             <div class="item-total">
                 ₹${(item.price * item.quantity).toFixed(2)}
             </div>
-            <button class="delete-btn" onclick="removeItem(${index})">
+            <button class="delete-btn" data-action="remove" data-index="${index}">
                 <i class="fas fa-trash"></i>
             </button>
         `;
@@ -203,6 +203,17 @@ checkoutBtn.addEventListener('click', async () => {
     }
 
     window.location.href = '../checkout/checkout.html';
+});
+
+// Event delegation for cart item buttons
+cartItemsContainer.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const index = parseInt(btn.dataset.index, 10);
+    if (action === 'decrease') decreaseQuantity(index);
+    else if (action === 'increase') increaseQuantity(index);
+    else if (action === 'remove') removeItem(index);
 });
 
 // Render cart
