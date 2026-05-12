@@ -308,6 +308,16 @@ nav a:hover {
     color: white;
 }
 
+.status-cancelled {
+    background-color: #dc3545;
+    color: white;
+}
+
+.status-refunded {
+    background-color: #6f42c1;
+    color: white;
+}
+
 .order-details {
     color: #ddd;
     font-size: 0.9rem;
@@ -369,6 +379,340 @@ nav a:hover {
     color: var(--light-color);
 }
 
+/* ==================== ORDER DETAIL MODAL ==================== */
+.order-item {
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+}
+
+.order-item:hover {
+    border-left-color: #fff;
+    transform: translateX(3px);
+}
+
+.order-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.order-modal-overlay.active {
+    display: flex;
+}
+
+.order-modal {
+    background: var(--dark-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 540px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 2rem;
+    animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.order-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.order-modal-close:hover {
+    color: var(--primary-color);
+}
+
+.modal-order-id {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--light-color);
+    margin-bottom: 0.25rem;
+}
+
+.modal-order-meta {
+    color: #aaa;
+    font-size: 0.88rem;
+    margin-bottom: 1.25rem;
+}
+
+.modal-section-title {
+    color: var(--primary-color);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 1.25rem 0 0.6rem;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.35rem;
+}
+
+.modal-delivery-block {
+    color: #ddd;
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+.modal-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    color: #ddd;
+}
+
+.modal-items-table th {
+    text-align: left;
+    color: #aaa;
+    font-weight: 600;
+    padding: 0.35rem 0.4rem;
+    border-bottom: 1px solid #333;
+}
+
+.modal-items-table td {
+    padding: 0.5rem 0.4rem;
+    border-bottom: 1px solid #222;
+    vertical-align: top;
+}
+
+.modal-items-table td:last-child,
+.modal-items-table th:last-child {
+    text-align: right;
+}
+
+.modal-price-row {
+    display: flex;
+    justify-content: space-between;
+    color: #ccc;
+    font-size: 0.92rem;
+    padding: 0.25rem 0;
+}
+
+.modal-price-row.total {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1.05rem;
+    border-top: 1px solid #444;
+    margin-top: 0.4rem;
+    padding-top: 0.6rem;
+}
+
+.modal-payment-ref {
+    color: #666;
+    font-size: 0.78rem;
+    margin-top: 1rem;
+    word-break: break-all;
+}
+
+/* ==================== CANCEL ORDER BUTTON ==================== */
+.btn-cancel-order {
+    width: 100%;
+    margin-top: 1.25rem;
+    padding: 0.75rem;
+    background: transparent;
+    color: #dc3545;
+    border: 2px solid #dc3545;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-cancel-order:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+/* ==================== CANCELLATION MODAL ==================== */
+.cancel-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.82);
+    z-index: 600;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.cancel-modal-overlay.active {
+    display: flex;
+}
+
+.cancel-modal {
+    background: var(--dark-color);
+    border: 1px solid #444;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 440px;
+    padding: 2rem;
+    position: relative;
+    animation: modalIn 0.2s ease;
+}
+
+.cancel-modal-icon {
+    font-size: 2.5rem;
+    color: #ffc107;
+    text-align: center;
+    margin-bottom: 0.75rem;
+}
+
+.cancel-modal-title {
+    font-size: 1.25rem;
+    color: var(--light-color);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.cancel-modal-sub {
+    font-size: 0.88rem;
+    color: #aaa;
+    text-align: center;
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+}
+
+.cancel-reason-group {
+    margin-bottom: 1.25rem;
+}
+
+.cancel-reason-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #ccc;
+    margin-bottom: 0.4rem;
+}
+
+.cancel-reason-input {
+    width: 100%;
+    background: #0d0d0d;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: var(--light-color);
+    padding: 0.65rem 0.75rem;
+    font-size: 0.9rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.2s;
+}
+
+.cancel-reason-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.cancel-reason-input::placeholder {
+    color: #555;
+}
+
+.cancel-modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.btn-cancel-confirm {
+    padding: 0.8rem;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-cancel-confirm:hover:not(:disabled) {
+    background: #b02a37;
+}
+
+.btn-cancel-confirm:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.btn-cancel-dismiss {
+    padding: 0.8rem;
+    background: transparent;
+    color: #aaa;
+    border: 1px solid #444;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.btn-cancel-dismiss:hover {
+    color: var(--light-color);
+    border-color: #888;
+}
+
+/* ==================== TOAST ==================== */
+.toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    background: #1e1e1e;
+    color: var(--light-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    z-index: 700;
+    transition: transform 0.3s ease;
+    border-left: 4px solid #666;
+    white-space: nowrap;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast.toast-success {
+    border-left-color: #28a745;
+}
+
+.toast.toast-error {
+    border-left-color: #dc3545;
+}
+
+.toast.toast-info {
+    border-left-color: var(--primary-color);
+}
+
+/* ==================== CANCELLATION INFO IN MODAL ==================== */
+.cancel-info-block {
+    background: rgba(220, 53, 69, 0.08);
+    border: 1px solid rgba(220, 53, 69, 0.25);
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-size: 0.88rem;
+    color: #ddd;
+    line-height: 1.6;
+}
+
+/* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
     header {
         justify-content: center;

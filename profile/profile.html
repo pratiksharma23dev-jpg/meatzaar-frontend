@@ -90,5 +90,41 @@
             </div>
         </div>
     </section>
+
+    <!-- Order Detail Modal -->
+    <div class="order-modal-overlay" id="orderModalOverlay">
+        <div class="order-modal" id="orderModal">
+            <button class="order-modal-close" id="orderModalClose" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="order-modal-content" id="orderModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Cancellation Confirmation Modal -->
+    <div class="cancel-modal-overlay" id="cancelModalOverlay">
+        <div class="cancel-modal">
+            <button class="order-modal-close" id="cancelModalClose" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="cancel-modal-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3 class="cancel-modal-title">Cancel this order?</h3>
+            <p class="cancel-modal-sub">This cannot be undone. If you paid online, the admin will process your refund manually via Razorpay.</p>
+            <div class="cancel-reason-group">
+                <label class="cancel-reason-label" for="cancelReasonInput">Reason <span style="color:#666;font-weight:400;">(optional)</span></label>
+                <textarea id="cancelReasonInput" class="cancel-reason-input" rows="3" maxlength="500"
+                    placeholder="e.g. Ordered by mistake, want to change address, found cheaper elsewhere…"></textarea>
+            </div>
+            <div class="cancel-modal-actions">
+                <button class="btn-cancel-confirm" id="cancelConfirmBtn">
+                    <i class="fas fa-ban"></i> Yes, Cancel Order
+                </button>
+                <button class="btn-cancel-dismiss" id="cancelDismissBtn">Keep Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 </body>
 </html>

@@ -84,6 +84,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Order filter
     $('#orderStatusFilter').addEventListener('change', renderOrders);
+
+    // Status dropdown changes — event delegation so no inline handlers are needed (CSP compliance).
+    $('#ordersList').addEventListener('change', (e) => {
+        const select = e.target.closest('.status-select');
+        if (!select) return;
+        const card = select.closest('[data-order-id]');
+        if (!card) return;
+        updateOrderStatus(card.dataset.orderId, select.value);
+    });
+
+    // Order ID search
+    $('#orderSearch').addEventListener('input', handleOrderSearchInput);
+    $('#clearOrderSearch').addEventListener('click', clearOrderSearch);
 });
 
 // ==================== AUTH ====================
@@ -479,6 +492,10 @@ async function handleAddProduct(e) {
 }
 
 // ==================== ORDERS ====================
+const ALL_STATUSES = ['pending','confirmed','preparing','out-for-delivery','shipped','delivered','cancelled','refunded'];
+let inSearchMode = false;
+let searchDebounce = null;
+
 async function loadOrders() {
     try {
         const res = await fetch(`${API_BASE}/orders`, { headers: authHeaders() });
@@ -491,98 +508,182 @@ async function loadOrders() {
     }
 }
 
-function renderOrders() {
-    const statusFilter = $('#orderStatusFilter').value;
-    let filtered = allOrders;
-    if (statusFilter) {
-        filtered = allOrders.filter(o => o.status === statusFilter);
-    }
+function renderOrderCard(order) {
+    const date = new Date(order.createdAt).toLocaleString('en-IN', {
+        day: 'numeric', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+    const userName  = order.user ? order.user.name  : 'Unknown';
+    const userEmail = order.user ? order.user.email : '';
+    const displayId = order.orderId || `#${order._id.slice(-8).toUpperCase()}`;
 
+    return `
+    <div class="order-card" data-order-id="${order._id}">
+        <div class="order-top">
+            <div>
+                <div class="order-id">${escapeHtml(displayId)}</div>
+                <div class="order-customer">${escapeHtml(userName)}${userEmail ? ` (${escapeHtml(userEmail)})` : ''}</div>
+                <div class="order-date">${date}</div>
+            </div>
+            <span class="order-status ${order.status}">${order.status.replace(/-/g, ' ')}</span>
+        </div>
+
+        <div class="order-items">
+            ${order.items.map(item => `
+                <div class="order-item-row">
+                    <span>${escapeHtml(item.name)}${item.weight ? ` (${escapeHtml(item.weight)})` : ''}</span>
+                    <span><span class="qty">x${item.quantity}</span> &nbsp; ₹${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+            `).join('')}
+        </div>
+
+        <div class="order-delivery-info">
+            <strong>Delivery:</strong> ${escapeHtml(order.deliveryInfo.fullName)},
+            ${escapeHtml(order.deliveryInfo.address)},
+            ${escapeHtml(order.deliveryInfo.city)} - ${escapeHtml(order.deliveryInfo.zip)} |
+            Phone: ${escapeHtml(order.deliveryInfo.phone)}
+        </div>
+
+        <div class="order-bottom">
+            <div class="order-total">
+                Subtotal: ₹${order.subtotal.toFixed(2)} | Tax: ₹${order.tax.toFixed(2)} | Delivery: ₹${order.deliveryFee.toFixed(2)}
+                <br><strong>Total: ₹${order.total.toFixed(2)}</strong>
+            </div>
+            <div>
+                <select class="status-select">
+                    ${ALL_STATUSES.map(s =>
+                        `<option value="${s}"${order.status === s ? ' selected' : ''}>${s.replace(/-/g, ' ')}</option>`
+                    ).join('')}
+                </select>
+            </div>
+        </div>
+    </div>`;
+}
+
+function renderOrderList(orders) {
     const container = $('#ordersList');
-    if (filtered.length === 0) {
+    if (orders.length === 0) {
         container.innerHTML = '';
         $('#noOrders').classList.remove('hidden');
         return;
     }
-
     $('#noOrders').classList.add('hidden');
-    container.innerHTML = filtered.map(order => {
-        const date = new Date(order.createdAt).toLocaleString('en-IN', {
-            day: 'numeric', month: 'short', year: 'numeric',
-            hour: '2-digit', minute: '2-digit'
-        });
-        const userName = order.user ? order.user.name : 'Unknown';
-        const userEmail = order.user ? order.user.email : '';
+    container.innerHTML = orders.map(renderOrderCard).join('');
+}
 
-        return `
-        <div class="order-card">
-            <div class="order-top">
-                <div>
-                    <div class="order-id">#${order._id.slice(-8).toUpperCase()}</div>
-                    <div class="order-customer">${escapeHtml(userName)} ${userEmail ? `(${escapeHtml(userEmail)})` : ''}</div>
-                    <div class="order-date">${date}</div>
-                </div>
-                <span class="order-status ${order.status}">${order.status.replace(/-/g, ' ')}</span>
-            </div>
-
-            <div class="order-items">
-                ${order.items.map(item => `
-                    <div class="order-item-row">
-                        <span>${escapeHtml(item.name)} ${item.weight ? `(${escapeHtml(item.weight)})` : ''}</span>
-                        <span><span class="qty">x${item.quantity}</span> &nbsp; ₹${(item.price * item.quantity).toFixed(2)}</span>
-                    </div>
-                `).join('')}
-            </div>
-
-            <div class="order-delivery-info">
-                <strong>Delivery:</strong> ${escapeHtml(order.deliveryInfo.fullName)},
-                ${escapeHtml(order.deliveryInfo.address)},
-                ${escapeHtml(order.deliveryInfo.city)} - ${escapeHtml(order.deliveryInfo.zip)} |
-                Phone: ${escapeHtml(order.deliveryInfo.phone)}
-            </div>
-
-            <div class="order-bottom">
-                <div class="order-total">
-                    Subtotal: ₹${order.subtotal.toFixed(2)} | Tax: ₹${order.tax.toFixed(2)} | Delivery: ₹${order.deliveryFee.toFixed(2)}
-                    <br><strong>Total: ₹${order.total.toFixed(2)}</strong>
-                </div>
-                <div>
-                    <select class="status-select" onchange="updateOrderStatus('${order._id}', this.value)">
-                        ${['pending','confirmed','preparing','out-for-delivery','delivered','cancelled'].map(s =>
-                            `<option value="${s}" ${order.status === s ? 'selected' : ''}>${s.replace(/-/g, ' ')}</option>`
-                        ).join('')}
-                    </select>
-                </div>
-            </div>
-        </div>
-        `;
-    }).join('');
+function renderOrders() {
+    const statusFilter = $('#orderStatusFilter').value;
+    const filtered = statusFilter
+        ? allOrders.filter(o => o.status === statusFilter)
+        : allOrders;
+    renderOrderList(filtered);
 }
 
 async function updateOrderStatus(orderId, newStatus) {
+    const order = allOrders.find(o => o._id === orderId);
+    const previousStatus = order ? order.status : null;
+
     try {
         const res = await fetch(`${API_BASE}/orders/${orderId}/status`, {
             method: 'PATCH',
-            headers: {
-                ...authHeaders(),
-                'Content-Type': 'application/json'
-            },
+            headers: { ...authHeaders(), 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: newStatus })
         });
         const data = await res.json();
+
         if (res.ok) {
-            showToast(`Order status updated to "${newStatus.replace(/-/g, ' ')}"`, 'success');
-            // Update local state
-            const order = allOrders.find(o => o._id === orderId);
             if (order) order.status = newStatus;
-            renderOrders();
+            showToast(`Status → "${newStatus.replace(/-/g, ' ')}"`, 'success');
+
+            const card = document.querySelector(`[data-order-id="${orderId}"]`);
+            if (card) {
+                const badge = card.querySelector('.order-status');
+                if (badge) {
+                    badge.className = `order-status ${newStatus}`;
+                    badge.textContent = newStatus.replace(/-/g, ' ');
+                }
+
+                // Fade card out only when a status filter is active and no longer matches.
+                // In search mode, never auto-remove cards.
+                const filterVal = inSearchMode ? '' : $('#orderStatusFilter').value;
+                if (filterVal && filterVal !== newStatus) {
+                    card.style.transition = 'opacity 0.35s';
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        card.remove();
+                        if (!$('#ordersList').querySelector('.order-card')) {
+                            $('#noOrders').classList.remove('hidden');
+                        }
+                    }, 350);
+                }
+            }
         } else {
+            const card = document.querySelector(`[data-order-id="${orderId}"]`);
+            if (card && previousStatus) {
+                const sel = card.querySelector('.status-select');
+                if (sel) sel.value = previousStatus;
+            }
             showToast(data.message || 'Update failed.', 'error');
-            loadOrders();
         }
     } catch {
+        const card = document.querySelector(`[data-order-id="${orderId}"]`);
+        if (card && previousStatus) {
+            const sel = card.querySelector('.status-select');
+            if (sel) sel.value = previousStatus;
+        }
         showToast('Server error.', 'error');
     }
+}
+
+// ==================== ORDER SEARCH ====================
+function handleOrderSearchInput() {
+    const q = $('#orderSearch').value.trim();
+    $('#clearOrderSearch').classList.toggle('hidden', !q);
+    clearTimeout(searchDebounce);
+    if (!q) { exitSearchMode(); return; }
+    searchDebounce = setTimeout(() => searchOrders(q), 400);
+}
+
+function clearOrderSearch() {
+    $('#orderSearch').value = '';
+    $('#clearOrderSearch').classList.add('hidden');
+    exitSearchMode();
+}
+
+async function searchOrders(q) {
+    inSearchMode = true;
+    $('#orderFiltersWrap').classList.add('hidden');
+    $('#searchResultsCount').classList.add('hidden');
+    $('#noOrders').classList.add('hidden');
+    $('#ordersList').innerHTML = '<div class="search-loading"><i class="fas fa-spinner fa-spin"></i> Searching…</div>';
+
+    try {
+        const res = await fetch(
+            `${API_BASE}/orders/search?q=${encodeURIComponent(q)}`,
+            { headers: authHeaders() }
+        );
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Search failed.');
+
+        const countEl = $('#searchResultsCount');
+        countEl.textContent = data.length === 0
+            ? `No orders match "${q}"`
+            : `${data.length} result${data.length !== 1 ? 's' : ''} for "${q}"`;
+        countEl.classList.remove('hidden');
+
+        renderOrderList(data);
+    } catch (err) {
+        $('#ordersList').innerHTML = '';
+        showToast(err.message || 'Search failed. Try again.', 'error');
+    }
+}
+
+function exitSearchMode() {
+    inSearchMode = false;
+    $('#orderFiltersWrap').classList.remove('hidden');
+    $('#searchResultsCount').classList.add('hidden');
+    $('#noOrders').textContent = 'No orders found.';
+    renderOrders();
 }
 
 // ==================== HELPERS ====================

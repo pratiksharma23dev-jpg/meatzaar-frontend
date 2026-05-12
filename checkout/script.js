@@ -65,21 +65,20 @@ zipInput.addEventListener('input', () => {
 async function validatePincode(pin) {
     pincodeStatus.textContent = 'Checking...';
     pincodeStatus.className = 'pincode-status checking';
+    pincodeValid = false;
 
     try {
-        const res = await fetch(`https://api.postalpincode.in/pincode/${encodeURIComponent(pin)}`);
+        const res = await fetch(`${window.API_BASE}/pincode/${encodeURIComponent(pin)}`, { credentials: 'include' });
         const data = await res.json();
 
-        if (data[0] && data[0].Status === 'Success') {
-            const place = data[0].PostOffice[0];
-            pincodeStatus.textContent = `✓ ${place.Name}, ${place.District}, ${place.State}`;
+        if (data.valid) {
+            pincodeStatus.textContent = `✓ ${data.name}, ${data.district}, ${data.state}`;
             pincodeStatus.className = 'pincode-status valid';
             pincodeValid = true;
 
-            // Auto-fill city if empty
             const cityInput = document.getElementById('city');
             if (!cityInput.value.trim()) {
-                cityInput.value = place.District;
+                cityInput.value = data.district;
             }
         } else {
             pincodeStatus.textContent = '✗ Invalid PIN code';
@@ -87,9 +86,9 @@ async function validatePincode(pin) {
             pincodeValid = false;
         }
     } catch {
-        pincodeStatus.textContent = '⚠ Could not verify';
-        pincodeStatus.className = 'pincode-status checking';
-        pincodeValid = true; // Allow submission if API is unreachable
+        pincodeStatus.textContent = '⚠ Could not verify PIN code. Please try again.';
+        pincodeStatus.className = 'pincode-status invalid';
+        pincodeValid = false;
     }
 }
 
@@ -432,7 +431,7 @@ payNowBtn.addEventListener('click', async () => {
                     alert(
                         `Payment Successful!\n\n` +
                         `Payment ID: ${paymentResponse.razorpay_payment_id}\n\n` +
-                        `Order ID: ${result.order.id}\n\n` +
+                        `Order ID: ${result.order.orderId}\n\n` +
                         `Thank you for shopping at Meatzaar!`
                     );
 

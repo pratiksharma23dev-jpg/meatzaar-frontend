@@ -204,19 +204,32 @@
         <section class="tab-content" id="tab-orders">
             <div class="section-header">
                 <h2>All Orders</h2>
-                <div class="order-filters">
-                    <select id="orderStatusFilter">
-                        <option value="">All Statuses</option>
-                        <option value="pending">Pending</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="preparing">Preparing</option>
-                        <option value="out-for-delivery">Out for Delivery</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
+                <div class="order-controls">
+                    <div class="order-search-wrap">
+                        <i class="fas fa-search order-search-icon"></i>
+                        <input type="text" id="orderSearch" class="order-search-input"
+                               placeholder="Search by Order ID…" autocomplete="off" maxlength="60">
+                        <button id="clearOrderSearch" class="clear-search-btn hidden" aria-label="Clear search">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="order-filters" id="orderFiltersWrap">
+                        <select id="orderStatusFilter">
+                            <option value="">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="preparing">Preparing</option>
+                            <option value="out-for-delivery">Out for Delivery</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="refunded">Refunded</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
+            <p class="search-results-count hidden" id="searchResultsCount"></p>
             <div class="orders-list" id="ordersList"></div>
             <p class="empty-msg hidden" id="noOrders">No orders found.</p>
         </section>
