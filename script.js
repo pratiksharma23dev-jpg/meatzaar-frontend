@@ -87,7 +87,6 @@ function resetSignupModalState() {
 function openSignupModal() {
     resetSignupModalState();
     signupModal.classList.add('active');
-    overlay.classList.add('active');
 }
 
 // ==================== SIDE MENU ==================== 
@@ -104,13 +103,6 @@ closeMenu.addEventListener('click', () => {
 overlay.addEventListener('click', () => {
     sideMenu.classList.remove('active');
     overlay.classList.remove('active');
-    if (loginModal.classList.contains('active')) {
-        loginModal.classList.remove('active');
-    }
-    if (signupModal.classList.contains('active')) {
-        signupModal.classList.remove('active');
-        resetSignupModalState();
-    }
 });
 
 // Close menu when a regular link is clicked
@@ -135,7 +127,6 @@ if (shopNowBtn) {
 const urlAction = new URLSearchParams(window.location.search).get('action');
 if (urlAction === 'login') {
     loginModal.classList.add('active');
-    overlay.classList.add('active');
 } else if (urlAction === 'signup') {
     openSignupModal();
 }
@@ -143,18 +134,16 @@ if (urlAction === 'login') {
 // Login Modal
 loginBtn.addEventListener('click', () => {
     loginModal.classList.add('active');
-    overlay.classList.add('active');
 });
 
 loginBtnMobile.addEventListener('click', () => {
     loginModal.classList.add('active');
-    overlay.classList.add('active');
     sideMenu.classList.remove('active');
+    overlay.classList.remove('active');
 });
 
 closeLoginModal.addEventListener('click', () => {
     loginModal.classList.remove('active');
-    overlay.classList.remove('active');
 });
 
 // Sign Up Modal
@@ -165,11 +154,11 @@ signupBtn.addEventListener('click', () => {
 signupBtnMobile.addEventListener('click', () => {
     openSignupModal();
     sideMenu.classList.remove('active');
+    overlay.classList.remove('active');
 });
 
 closeSignupModal.addEventListener('click', () => {
     signupModal.classList.remove('active');
-    overlay.classList.remove('active');
     resetSignupModalState();
 });
 
@@ -184,6 +173,20 @@ switchToLogin.addEventListener('click', (e) => {
     e.preventDefault();
     signupModal.classList.remove('active');
     loginModal.classList.add('active');
+});
+
+// Close modals when clicking the dark backdrop (outside the modal-content box)
+loginModal.addEventListener('click', (e) => {
+    if (!e.target.closest('.modal-content')) {
+        loginModal.classList.remove('active');
+    }
+});
+
+signupModal.addEventListener('click', (e) => {
+    if (!e.target.closest('.modal-content')) {
+        signupModal.classList.remove('active');
+        resetSignupModalState();
+    }
 });
 
 // ==================== FORM HANDLING ====================
@@ -459,3 +462,21 @@ const reviewObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.review-card').forEach(card => {
     reviewObserver.observe(card);
 });
+
+// ==================== ANNOUNCEMENT BAR MARQUEE ====================
+(function initMarquee() {
+    const track = document.querySelector('.announcement-track');
+    if (!track) return;
+    const first = track.querySelector('.announcement-content');
+    if (!first) return;
+    const contentW = first.offsetWidth;
+    if (!contentW) return;
+    // Clone copies until the track is 2.5x viewport wide so text always enters from the right
+    const needed = Math.max(2, Math.ceil((window.innerWidth * 2.5) / contentW));
+    const existing = track.querySelectorAll('.announcement-content').length;
+    for (let i = existing; i < needed; i++) {
+        track.appendChild(first.cloneNode(true));
+    }
+    // Shift by exactly one copy width for a seamless loop
+    track.style.setProperty('--marquee-shift', `-${contentW}px`);
+})();

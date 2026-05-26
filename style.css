@@ -11,6 +11,84 @@
     --text-color: #ffffff;
     --border-color: #333;
     --bg-color: #0d0d0d;
+    --bar-height: 34px;
+}
+
+/* ==================== ANNOUNCEMENT BAR ==================== */
+.announcement-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--bar-height);
+    z-index: 1001;
+    background: linear-gradient(90deg, #1a0800, #2d1400, #3d1f00, #2d1400, #1a0800);
+    border-bottom: 1px solid rgba(255, 115, 0, 0.5);
+    box-shadow: 0 1px 12px rgba(255, 115, 0, 0.18);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.announcement-track {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    transform: translateX(0);
+    animation: marquee-scroll 18s linear infinite;
+    will-change: transform;
+}
+
+.announcement-bar:hover .announcement-track {
+    animation-play-state: paused;
+}
+
+.announcement-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    padding-right: 0; /* gap is now handled by the inline | separator */
+}
+
+.bar-tagline {
+    color: #fff;
+    font-weight: 600;
+}
+
+.bar-pipe {
+    color: rgba(255, 115, 0, 0.55);
+    margin: 0 1.1rem;
+    font-weight: 300;
+    font-size: 0.9rem;
+}
+
+.announcement-content .bar-label {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-right: 0.6rem;
+}
+
+.announcement-content .bar-city {
+    color: #fff;
+    font-weight: 600;
+}
+
+.announcement-content .bar-sep {
+    color: var(--primary-color);
+    margin: 0 0.55rem;
+    font-weight: 700;
+}
+
+@keyframes marquee-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(var(--marquee-shift, -50%)); }
 }
 
 body {
@@ -41,7 +119,7 @@ body::before {
     color: var(--light-color);
     padding: 1rem 2rem;
     position: fixed;
-    top: 0;
+    top: var(--bar-height);   /* sits below the fixed announcement bar */
     left: 0;
     right: 0;
     z-index: 100;
@@ -184,7 +262,7 @@ body:not(.auth-ui-ready) .auth-buttons {
     background-color: var(--dark-color);
     color: var(--light-color);
     padding: 2rem 1.5rem;
-    z-index: 200;
+    z-index: 1100;
     transition: left 0.3s ease;
     overflow-y: auto;
 }
@@ -255,7 +333,7 @@ body:not(.auth-ui-ready) .auth-buttons {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 150;
+    z-index: 1050;
     display: none;
 }
 
@@ -273,7 +351,8 @@ body:not(.auth-ui-ready) .auth-buttons {
     padding: 4rem 2rem;
     gap: 3rem;
     min-height: 90vh;
-    padding-top: 6rem;
+    /* Extra top padding: 6rem for header + bar height so content clears both */
+    padding-top: calc(6rem + var(--bar-height));
 }
 
 body {
@@ -306,6 +385,25 @@ body {
 .hero-image {
     flex: 1;
     text-align: center;
+}
+
+.hero-delivery-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 115, 0, 0.12);
+    border: 1px solid rgba(255, 115, 0, 0.35);
+    border-radius: 50px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.82rem;
+    color: #ffbf80;
+    margin-bottom: 1.2rem;
+    letter-spacing: 0.02em;
+}
+
+.hero-delivery-badge i {
+    color: var(--primary-color);
+    font-size: 0.85rem;
 }
 
 @keyframes heroHeadlineSlideIn {
@@ -632,6 +730,16 @@ body {
     border-top: 2px solid var(--primary-color);
 }
 
+.footer-delivery {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: #bbb;
+}
+
+.footer-delivery strong {
+    color: #fff;
+}
+
 .social-links {
     margin-top: 1rem;
     display: flex;
@@ -657,11 +765,11 @@ body {
     width: 100%;
     height: 100%;
     padding: 1.5rem;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 300;
+    z-index: 1060;
     visibility: hidden;
     opacity: 0;
     transition: opacity 0.3s, visibility 0.3s;
@@ -818,7 +926,7 @@ body {
 
     .hero {
         flex-direction: column;
-        padding: 8.5rem 1rem 2rem;
+        padding: calc(8.5rem + var(--bar-height)) 1rem 2rem;
         background-color: var(--primary-color);
         min-height: 100vh;
         justify-content: center;

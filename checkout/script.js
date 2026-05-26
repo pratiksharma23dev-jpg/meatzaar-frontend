@@ -43,9 +43,27 @@ sideLinks.forEach(link => {
     });
 });
 
-// ==================== PINCODE VALIDATION ====================
+// ==================== CITY DROPDOWN ====================
+const citySelect = document.getElementById('city');
+const cityError = document.getElementById('cityError');
+
+citySelect.addEventListener('change', () => {
+    // Clear error when user makes a selection
+    if (citySelect.value) {
+        cityError.classList.remove('visible');
+    }
+    // Re-run serviceability check if a full pincode is already entered
+    const pin = zipInput.value.replace(/\D/g, '');
+    if (pin.length === 6) {
+        clearTimeout(pincodeTimeout);
+        pincodeTimeout = setTimeout(() => checkServiceability(pin), 100);
+    }
+});
+
+// ==================== PINCODE + SERVICEABILITY VALIDATION ====================
 const zipInput = document.getElementById('zip');
 const pincodeStatus = document.getElementById('pincodeStatus');
+const serviceabilityStatus = document.getElementById('serviceabilityStatus');
 let pincodeValid = false;
 let pincodeTimeout = null;
 
@@ -53,41 +71,85 @@ zipInput.addEventListener('input', () => {
     const pin = zipInput.value.replace(/\D/g, '');
     zipInput.value = pin;
     pincodeValid = false;
+
+    // Reset both status lines
     pincodeStatus.textContent = '';
     pincodeStatus.className = 'pincode-status';
+    serviceabilityStatus.textContent = '';
+    serviceabilityStatus.className = 'pincode-status';
 
     if (pin.length < 6) return;
 
     clearTimeout(pincodeTimeout);
-    pincodeTimeout = setTimeout(() => validatePincode(pin), 300);
+    // Debounce: wait 400ms after last keystroke before hitting API
+    pincodeTimeout = setTimeout(() => checkServiceability(pin), 400);
 });
 
-async function validatePincode(pin) {
-    pincodeStatus.textContent = 'Checking...';
-    pincodeStatus.className = 'pincode-status checking';
+async function checkServiceability(pin) {
+    const city = citySelect.value;
+
+    // Step 1: basic format check (client-side, instant)
+    if (!/^\d{6}$/.test(pin)) {
+        pincodeStatus.textContent = '✗ PIN code must be exactly 6 digits.';
+        pincodeStatus.className = 'pincode-status invalid';
+        pincodeValid = false;
+        return;
+    }
+
+    // Step 2: city must be selected first
+    if (!city) {
+        pincodeStatus.textContent = '';
+        serviceabilityStatus.textContent = '⚠ Please select a city first.';
+        serviceabilityStatus.className = 'pincode-status invalid';
+        pincodeValid = false;
+        return;
+    }
+
+    // Step 3: quick client-side pre-check (avoids round-trip for obviously wrong pincodes)
+    if (window.SERVICEABLE_AREAS) {
+        const clientResult = window.SERVICEABLE_AREAS.isServiceable(city, pin);
+        if (!clientResult) {
+            serviceabilityStatus.textContent = '✗ Area not serviceable';
+            serviceabilityStatus.className = 'pincode-status invalid';
+            pincodeValid = false;
+            return;
+        }
+    }
+
+    // Step 4: server-side confirmation (authoritative check)
+    serviceabilityStatus.textContent = 'Checking availability...';
+    serviceabilityStatus.className = 'pincode-status checking';
     pincodeValid = false;
 
     try {
-        const res = await fetch(`${window.API_BASE}/pincode/${encodeURIComponent(pin)}`, { credentials: 'include' });
+        const res = await fetch(`${window.API_BASE}/serviceability/check`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ city, pincode: pin })
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            serviceabilityStatus.textContent = `⚠ ${err.message || 'Could not verify area. Please try again.'}`;
+            serviceabilityStatus.className = 'pincode-status invalid';
+            pincodeValid = false;
+            return;
+        }
+
         const data = await res.json();
 
-        if (data.valid) {
-            pincodeStatus.textContent = `✓ ${data.name}, ${data.district}, ${data.state}`;
-            pincodeStatus.className = 'pincode-status valid';
+        if (data.success && data.serviceable) {
+            serviceabilityStatus.textContent = `✓ Delivery available in your area`;
+            serviceabilityStatus.className = 'pincode-status valid';
             pincodeValid = true;
-
-            const cityInput = document.getElementById('city');
-            if (!cityInput.value.trim()) {
-                cityInput.value = data.district;
-            }
         } else {
-            pincodeStatus.textContent = '✗ Invalid PIN code';
-            pincodeStatus.className = 'pincode-status invalid';
+            serviceabilityStatus.textContent = '✗ Area not serviceable';
+            serviceabilityStatus.className = 'pincode-status invalid';
             pincodeValid = false;
         }
     } catch {
-        pincodeStatus.textContent = '⚠ Could not verify PIN code. Please try again.';
-        pincodeStatus.className = 'pincode-status invalid';
+        serviceabilityStatus.textContent = '⚠ Could not verify area. Please try again.';
+        serviceabilityStatus.className = 'pincode-status invalid';
         pincodeValid = false;
     }
 }
@@ -324,12 +386,19 @@ payNowBtn.addEventListener('click', async () => {
     const address = document.getElementById('address').value.trim();
     const address2 = document.getElementById('address2').value.trim();
     const landmark = document.getElementById('landmark').value.trim();
-    const city = document.getElementById('city').value.trim();
+    const city = citySelect.value;   // from the controlled dropdown
     const zip = document.getElementById('zip').value.trim();
     const phone = normalizePhone(document.getElementById('phone').value.trim());
 
-    if (!name || !address || !landmark || !city || !zip || !phone) {
+    if (!name || !address || !landmark || !zip || !phone) {
         alert('Please fill in all required delivery details.');
+        return;
+    }
+
+    // City dropdown validation
+    if (!city) {
+        cityError.classList.add('visible');
+        citySelect.focus();
         return;
     }
 
@@ -344,7 +413,7 @@ payNowBtn.addEventListener('click', async () => {
     }
 
     if (!pincodeValid) {
-        alert('Please enter a valid PIN code. The entered PIN code could not be verified.');
+        alert('Delivery is not available in your area. Please select a serviceable city and PIN code.');
         return;
     }
 
@@ -467,3 +536,19 @@ payNowBtn.addEventListener('click', async () => {
 // Initial render
 renderCheckout();
 prefillSavedDeliveryInfo();
+
+// ==================== ANNOUNCEMENT BAR MARQUEE ====================
+(function initMarquee() {
+    const track = document.querySelector('.announcement-track');
+    if (!track) return;
+    const first = track.querySelector('.announcement-content');
+    if (!first) return;
+    const contentW = first.offsetWidth;
+    if (!contentW) return;
+    const needed = Math.max(2, Math.ceil((window.innerWidth * 2.5) / contentW));
+    const existing = track.querySelectorAll('.announcement-content').length;
+    for (let i = existing; i < needed; i++) {
+        track.appendChild(first.cloneNode(true));
+    }
+    track.style.setProperty('--marquee-shift', `-${contentW}px`);
+})();

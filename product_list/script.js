@@ -330,6 +330,11 @@ function changeQty(productId, delta) {
 
 // ==================== ADD TO CART ====================
 function addToCart(productId) {
+    if (typeof MeatzaarAuth !== 'undefined' && !MeatzaarAuth.isLoggedIn()) {
+        window.location.href = '/index.html?action=login';
+        return;
+    }
+
     const product = productCatalog.find(p => p.id === productId);
     if (!product || product.status === 'out-of-stock') return;
 

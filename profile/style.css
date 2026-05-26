@@ -680,13 +680,17 @@ nav a:hover {
     font-weight: 500;
     box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     z-index: 700;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
     border-left: 4px solid #666;
     white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
 }
 
 .toast.show {
     transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    visibility: visible;
 }
 
 .toast.toast-success {

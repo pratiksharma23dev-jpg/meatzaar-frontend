@@ -11,10 +11,37 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="../shared/config.js"></script>
+    <script src="../shared/serviceableAreas.js"></script>
     <script src="../shared/auth.js" defer></script>
     <script src="script.js" defer></script>
 </head>
 <body>
+    <!-- Announcement Bar -->
+    <div class="announcement-bar" role="marquee" aria-label="Delivery areas announcement">
+        <div class="announcement-track" aria-hidden="true">
+            <span class="announcement-content">
+                <span style="margin-right:0.35rem;">🔥</span><span class="bar-tagline">The Art of Fine Cuts</span>
+                <span class="bar-pipe">|</span>
+                <span class="bar-label">Delivering In:</span>
+                <span class="bar-city">Mumbai</span><span class="bar-sep">•</span>
+                <span class="bar-city">Pune</span><span class="bar-sep">•</span>
+                <span class="bar-city">Goa</span><span class="bar-sep">•</span>
+                <span class="bar-city">Surat</span>
+                <span class="bar-pipe">|</span>
+            </span>
+            <span class="announcement-content">
+                <span style="margin-right:0.35rem;">🔥</span><span class="bar-tagline">The Art of Fine Cuts</span>
+                <span class="bar-pipe">|</span>
+                <span class="bar-label">Delivering In:</span>
+                <span class="bar-city">Mumbai</span><span class="bar-sep">•</span>
+                <span class="bar-city">Pune</span><span class="bar-sep">•</span>
+                <span class="bar-city">Goa</span><span class="bar-sep">•</span>
+                <span class="bar-city">Surat</span>
+                <span class="bar-pipe">|</span>
+            </span>
+        </div>
+    </div>
+
     <!-- Header -->
     <header>
         <div class="header-left">
@@ -104,10 +131,18 @@
                     <input type="text" id="address" placeholder="Address Line 1 *" class="checkout-input" required>
                     <input type="text" id="address2" placeholder="Address Line 2 (Optional)" class="checkout-input">
                     <input type="text" id="landmark" placeholder="Landmark * (e.g. Near City Mall)" class="checkout-input" required>
-                    <input type="text" id="city" placeholder="City *" class="checkout-input" required>
+                    <select id="city" class="city-select" required aria-label="Select delivery city">
+                        <option value="">Select City *</option>
+                        <option value="Mumbai">Mumbai</option>
+                        <option value="Pune">Pune</option>
+                        <option value="Goa">Goa</option>
+                        <option value="Surat">Surat</option>
+                    </select>
+                    <div class="city-error" id="cityError">Please select a valid delivery city.</div>
                     <div class="pincode-wrapper">
                         <input type="text" id="zip" placeholder="PIN Code *" class="checkout-input" maxlength="6" inputmode="numeric" required>
                         <span class="pincode-status" id="pincodeStatus"></span>
+                        <span class="pincode-status" id="serviceabilityStatus"></span>
                     </div>
                     <div class="phone-verify-block">
                         <div class="phone-row">

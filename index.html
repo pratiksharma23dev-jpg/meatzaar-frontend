@@ -13,12 +13,39 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script>const PRODUCT_IMG_BASE = '../';</script>
     <script src="../shared/config.js"></script>
+    <script src="../shared/serviceableAreas.js"></script>
     <script src="../shared/auth.js" defer></script>
     <script src="../shared/products-data.js" defer></script>
     <script src="script.js" defer></script>
 </head>
 
 <body>
+    <!-- Announcement Bar -->
+    <div class="announcement-bar" role="marquee" aria-label="Delivery areas announcement">
+        <div class="announcement-track" aria-hidden="true">
+            <span class="announcement-content">
+                <span style="margin-right:0.35rem;">🔥</span><span class="bar-tagline">The Art of Fine Cuts</span>
+                <span class="bar-pipe">|</span>
+                <span class="bar-label">Delivering In:</span>
+                <span class="bar-city">Mumbai</span><span class="bar-sep">•</span>
+                <span class="bar-city">Pune</span><span class="bar-sep">•</span>
+                <span class="bar-city">Goa</span><span class="bar-sep">•</span>
+                <span class="bar-city">Surat</span>
+                <span class="bar-pipe">|</span>
+            </span>
+            <span class="announcement-content">
+                <span style="margin-right:0.35rem;">🔥</span><span class="bar-tagline">The Art of Fine Cuts</span>
+                <span class="bar-pipe">|</span>
+                <span class="bar-label">Delivering In:</span>
+                <span class="bar-city">Mumbai</span><span class="bar-sep">•</span>
+                <span class="bar-city">Pune</span><span class="bar-sep">•</span>
+                <span class="bar-city">Goa</span><span class="bar-sep">•</span>
+                <span class="bar-city">Surat</span>
+                <span class="bar-pipe">|</span>
+            </span>
+        </div>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="header-container">
@@ -68,7 +95,11 @@
     <!-- Hero Section -->
     <section id="home" class="hero">
         <div class="hero-content">
-            <h2>The Art of Fine Cuts.</h2>
+            <div class="hero-delivery-badge">
+                <i class="fas fa-map-marker-alt"></i>
+                Delivering in Mumbai &bull; Pune &bull; Goa &bull; Surat
+            </div>
+            <h2>The The Art of Fine Cuts.</h2>
             <p>Premium Quality Meat Delivered to Your Doorstep.</p>
             <button class="btn btn-primary" id="shopNowBtn">Shop Now</button>
         </div>
@@ -179,6 +210,10 @@
     <!-- Footer -->
     <footer class="footer">
         <p>&copy; 2026 Meatzaar. All rights reserved.</p>
+        <p class="footer-delivery">
+            <i class="fas fa-truck" style="color:var(--primary-color);margin-right:0.4rem;"></i>
+            Delivering to: <strong>Mumbai &nbsp;•&nbsp; Pune &nbsp;•&nbsp; Goa &nbsp;•&nbsp; Surat</strong>
+        </p>
         <div class="social-links">
             <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
             <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>

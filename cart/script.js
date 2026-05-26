@@ -218,3 +218,19 @@ cartItemsContainer.addEventListener('click', (e) => {
 
 // Render cart
 renderCart();
+
+// ==================== ANNOUNCEMENT BAR MARQUEE ====================
+(function initMarquee() {
+    const track = document.querySelector('.announcement-track');
+    if (!track) return;
+    const first = track.querySelector('.announcement-content');
+    if (!first) return;
+    const contentW = first.offsetWidth;
+    if (!contentW) return;
+    const needed = Math.max(2, Math.ceil((window.innerWidth * 2.5) / contentW));
+    const existing = track.querySelectorAll('.announcement-content').length;
+    for (let i = existing; i < needed; i++) {
+        track.appendChild(first.cloneNode(true));
+    }
+    track.style.setProperty('--marquee-shift', `-${contentW}px`);
+})();
