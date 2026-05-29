@@ -528,7 +528,25 @@ paginationContainer.addEventListener('click', (e) => {
     goToPage(parseInt(btn.dataset.page, 10));
 });
 
+// ==================== SKELETON LOADING ====================
+function showSkeletons() {
+    const count = getPerPage();
+    productsGrid.innerHTML = Array.from({ length: count }, () => `
+        <div class="product-card skeleton-card">
+            <div class="product-image skel"></div>
+            <div class="product-body">
+                <span class="skel skel-line skel-tags"></span>
+                <span class="skel skel-line skel-name"></span>
+                <span class="skel skel-line skel-weight"></span>
+                <span class="skel skel-line skel-price"></span>
+                <span class="skel skel-line skel-actions"></span>
+            </div>
+        </div>
+    `).join('');
+}
+
 // ==================== INIT ====================
+showSkeletons();
 if (typeof productsReady !== 'undefined') {
     productsReady.then(() => {
         _initQuantities();

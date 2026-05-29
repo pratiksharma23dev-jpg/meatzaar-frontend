@@ -522,6 +522,86 @@ body::after {
     }
 }
 
+/* ==================== SKELETON LOADING ==================== */
+@keyframes skel-shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position: 600px 0; }
+}
+
+.skel {
+    background: linear-gradient(
+        90deg,
+        #212121 25%,
+        #2e2e2e 50%,
+        #212121 75%
+    );
+    background-size: 1200px 100%;
+    animation: skel-shimmer 1.5s linear infinite;
+    border-radius: 6px;
+    display: block;
+}
+
+.product-skeleton {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+.pskel-image-wrap {
+    background: var(--panel-color);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 18px 45px var(--shadow-color);
+}
+
+.pskel-image {
+    height: min(550px, 68vh);
+    min-height: 360px;
+    border-radius: 18px;
+    width: 100%;
+}
+
+.pskel-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.pskel-line { border-radius: 6px; }
+.pskel-eyebrow  { height: 12px; width: 30%; }
+.pskel-title-a  { height: 36px; width: 90%; }
+.pskel-title-b  { height: 36px; width: 60%; }
+.pskel-price    { height: 36px; width: 38%; }
+.pskel-badge    { height: 26px; width: 22%; border-radius: 999px; }
+.pskel-summary-a { height: 15px; width: 100%; }
+.pskel-summary-b { height: 15px; width: 75%; }
+
+.pskel-purchase-box {
+    height: 115px;
+    border-radius: 18px;
+    width: 100%;
+}
+
+.pskel-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.pskel-meta-item {
+    height: 72px;
+    border-radius: 14px;
+}
+
+@media (max-width: 960px) {
+    .product-skeleton {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ==================== AUTH MODAL ==================== */
 .modal {
     display: none;

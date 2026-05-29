@@ -974,3 +974,49 @@ body {
         padding: 0.4rem 0.7rem;
     }
 }
+
+/* ==================== SKELETON LOADING ==================== */
+@keyframes skel-shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position: 600px 0; }
+}
+
+.skel {
+    background: linear-gradient(
+        90deg,
+        #252525 25%,
+        #323232 50%,
+        #252525 75%
+    );
+    background-size: 1200px 100%;
+    animation: skel-shimmer 1.5s linear infinite;
+    border-radius: 6px;
+    display: block;
+}
+
+.skeleton-card {
+    pointer-events: none;
+    user-select: none;
+}
+
+.skeleton-card .product-image {
+    height: 180px;
+    display: block;
+    border-radius: 0;
+}
+
+.skeleton-card .product-body {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.skel-line {
+    border-radius: 4px;
+}
+
+.skel-tags    { height: 14px; width: 55%; margin-bottom: 0.5rem; }
+.skel-name    { height: 18px; width: 80%; margin-bottom: 0.4rem; }
+.skel-weight  { height: 13px; width: 45%; margin-bottom: 0.75rem; }
+.skel-price   { height: 20px; width: 50%; margin-bottom: 0.75rem; }
+.skel-actions { height: 32px; width: 100%; border-radius: 6px; margin-top: 0.25rem; }

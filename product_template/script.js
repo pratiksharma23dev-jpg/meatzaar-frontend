@@ -130,6 +130,8 @@ function renderProductImages(product) {
 
 function revealLayout() {
     const layout = document.getElementById('productLayout');
+    const skeleton = document.getElementById('productSkeleton');
+    if (skeleton) skeleton.style.display = 'none';
     if (layout) layout.style.visibility = 'visible';
 }
 
