@@ -147,7 +147,8 @@ async function checkServiceability(pin) {
             serviceabilityStatus.className = 'pincode-status invalid';
             pincodeValid = false;
         }
-    } catch {
+    } catch (err) {
+        console.error('Serviceability check failed:', err);
         serviceabilityStatus.textContent = '⚠ Could not verify area. Please try again.';
         serviceabilityStatus.className = 'pincode-status invalid';
         pincodeValid = false;
