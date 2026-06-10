@@ -261,16 +261,32 @@ function renderCheckout() {
     cart.forEach(item => {
         const itemEl = document.createElement('div');
         itemEl.className = 'order-item';
-        itemEl.innerHTML = `
-            <div class="order-item-icon">
-                <i class="fas fa-drumstick-bite"></i>
-            </div>
-            <div class="order-item-details">
-                <div class="order-item-name">${item.name}</div>
-                <div class="order-item-meta">Qty: ${item.quantity} &times; ₹${parseFloat(item.price).toFixed(2)}</div>
-            </div>
-            <div class="order-item-price">₹${(item.price * item.quantity).toFixed(2)}</div>
-        `;
+
+        const icon = document.createElement('div');
+        icon.className = 'order-item-icon';
+        icon.innerHTML = '<i class="fas fa-drumstick-bite"></i>';
+
+        const details = document.createElement('div');
+        details.className = 'order-item-details';
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'order-item-name';
+        nameEl.textContent = item.name;
+
+        const metaEl = document.createElement('div');
+        metaEl.className = 'order-item-meta';
+        metaEl.textContent = `Qty: ${Number(item.quantity)} × ₹${parseFloat(item.price).toFixed(2)}`;
+
+        details.appendChild(nameEl);
+        details.appendChild(metaEl);
+
+        const priceEl = document.createElement('div');
+        priceEl.className = 'order-item-price';
+        priceEl.textContent = `₹${(parseFloat(item.price) * Number(item.quantity)).toFixed(2)}`;
+
+        itemEl.appendChild(icon);
+        itemEl.appendChild(details);
+        itemEl.appendChild(priceEl);
         orderItemsContainer.appendChild(itemEl);
     });
 

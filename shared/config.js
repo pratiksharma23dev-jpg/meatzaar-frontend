@@ -5,7 +5,10 @@
     const LEGACY_LOCAL_BACKEND_ORIGIN = 'http://localhost:5000';
     const localHosts = new Set(['localhost', '127.0.0.1', '::1']);
     const isLocal = localHosts.has(window.location.hostname);
-    const overrideOrigin = window.MEATZAAR_BACKEND_ORIGIN || localStorage.getItem('MEATZAAR_BACKEND_ORIGIN');
+    // Only allow override via the window global (set at build/deploy time), never via localStorage.
+    // Accepting an attacker-controlled localStorage value would let any XSS redirect all API
+    // traffic to a malicious server and capture credentials.
+    const overrideOrigin = window.MEATZAAR_BACKEND_ORIGIN || null;
     const backendOrigin = overrideOrigin
         || (isLocal ? LOCAL_BACKEND_ORIGIN : PROD_BACKEND_ORIGIN);
     const normalizedOrigin = backendOrigin.replace(/\/+$/, '');

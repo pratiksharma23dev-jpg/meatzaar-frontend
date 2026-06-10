@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Password strength ──
     function getStrength(pw) {
-        if (pw.length < 6) return { score: 0, label: '', color: '' };
+        if (pw.length < 8) return { score: 0, label: '', color: '' };
         let score = 0;
         if (pw.length >= 8)  score++;
         if (pw.length >= 12) score++;
@@ -102,9 +102,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const confirm  = confirmInput.value;
         let valid = true;
 
-        if (!password || password.length < 6) {
+        if (!password || password.length < 8) {
             passwordInput.classList.add('error');
-            passwordError.textContent = 'Password must be at least 6 characters.';
+            passwordError.textContent = 'Password must be at least 8 characters.';
             valid = false;
         }
 
